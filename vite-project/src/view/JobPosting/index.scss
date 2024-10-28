@@ -1,0 +1,20 @@
+.JobPosting-container{
+    display: flex;
+    justify-content: space-between;
+    height: calc(100% - 10px);
+    .Job-content{
+        display: flex;
+        width: 650px;
+        padding: 15px;
+        overflow-y: auto;
+        border: 1px solid #F5F5F5;
+    }
+    .Job-label{
+        padding: 15px;
+        flex: 1;
+    }
+}
+/* 给特定容器添加滚动条样式 */
+.Job-content::-webkit-scrollbar {
+    width: var(--scrollbar-width);
+}

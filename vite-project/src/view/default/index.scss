@@ -1,0 +1,19 @@
+.container-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    padding: 0 10px;
+    border-radius: 5px 5px 0 0;
+    color: #A8A8B3;
+    background: #3A4357;
+    &-back{
+        font-size: 14px;
+        cursor: pointer;
+    }
+    &-go{
+        font-size: 14px;
+        cursor: pointer;
+    }
+}

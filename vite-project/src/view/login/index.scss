@@ -1,0 +1,19 @@
+.KG-login{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    .KG-content{
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 40px 25px;
+        border-radius: 10px;
+        background: #ffffff;
+        .KG-content-title{
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #194bb7;
+        }
+    }
+}

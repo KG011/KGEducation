@@ -1,0 +1,72 @@
+#root .ant-list-item:hover {
+    cursor: pointer;
+    background: #F0F6FF;
+}
+
+.exam-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    &-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        color: rgba(0, 0, 0, 0.88);
+        border-block-end: 1px solid rgba(5, 5, 5, 0.06);
+        cursor: pointer;
+
+        &-meta {
+            display: flex;
+            flex: 1;
+            align-items: flex-start;
+            max-width: 100%;
+
+            &-avater {
+                position: relative;
+                width: 90px;
+                height: 75px;
+                margin-inline-end: 16px;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 5px;
+                }
+
+            }
+
+            &-avater::after {
+                content: '';
+                position: absolute;
+                right: -2px;
+                top: -4px;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #f33f34;
+            }
+
+            &-content {
+                &-title {
+                    font-size: 18px;
+                    color: #474C59;
+                }
+
+                &-user {
+                    margin-top: 5px;
+                    font-size: 13px;
+                    color: #8A8B99;
+                }
+            }
+        }
+
+    }
+
+    &-item:hover {
+        background: #F0F6FF;
+        .exam-list-item-meta-content-title{
+            color: #3A8BFF;
+        }
+    }
+}

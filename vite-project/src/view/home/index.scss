@@ -1,0 +1,23 @@
+#root .ant-menu {
+    height: 100%;
+    padding-top: 15px;
+    overflow: auto;
+}
+
+.kg-home {
+    height: 100%;
+    width: 100%;
+
+    .kg-container {
+        display: flex;
+        width: 100%;
+        height: calc(100% - 56px);
+        overflow-y: auto;
+        .kg-content {
+            flex: 1;
+            padding: 20px;
+            background: #F5F5F5;
+        }
+    }
+
+}
