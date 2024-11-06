@@ -143,11 +143,11 @@ app.use((err, req, res, next) => {
   // 其它错误
   res.send({
     status: 500,
-    msg: err.message,
+    msg: err.message+'请重新登录',
   });
 });
 
 // 调用 app.listen 方法，指定端口号启动 web 服务器
 app.listen(3000, () => {
-  console.log("api server running at http://127.0.0.1:3001");
+  console.log("api server running at http://127.0.0.1:3000");
 });

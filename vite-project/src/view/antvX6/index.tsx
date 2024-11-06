@@ -1,29 +1,40 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Graph } from '@antv/x6';
 import type { Cell } from '@antv/x6';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
-import { Snapline } from '@antv/x6-plugin-snapline';
-import { Keyboard } from '@antv/x6-plugin-keyboard';
-import { Transform } from '@antv/x6-plugin-transform';
-import { Stencil } from '@antv/x6-plugin-stencil';
-import { Clipboard } from '@antv/x6-plugin-clipboard'
-import { Selection } from '@antv/x6-plugin-selection'
-import { Export } from '@antv/x6-plugin-export'
-import { History } from '@antv/x6-plugin-history'
-// import { Scroller } from '@antv/x6-plugin-scroller'
 import OptionDialog from './optionDialog';
 import FunctionalZone from './functionalZone';
+import { addNotebookApi, deleteNotebookApi, getNotebookJsonDataApi } from '@/config/apis/modules/course';
+import { useSearchParams } from 'react-router-dom';
+import { useGlobalContext } from '@/context/Global';
+import useAntvX6 from './useGraph';
+import { Stencil } from '@antv/x6-plugin-stencil';
+import { initBaseX6, initMindMapX6 } from './initGraph';
+import { getUserIDFromLocalStorage } from '@/utils/storage';
+import { message } from 'antd';
 const AntvX6 = () => {
+    const { setRouter } = useGlobalContext()
+    const [searchParams] = useSearchParams();
+    const [messageApi, contextHolder] = message.useMessage();
+
+    //画布ID
+    const notebook_id = searchParams.get('notebook_id');
+    //画布类型
+    const notebook_type = searchParams.get('notebook_type');
+    //画布渲染盒子
     const containerRef = useRef<HTMLDivElement>(null);
+    //物料区
     const stencilContainer = useRef<HTMLDivElement>(null);
     const [isShowOptionDialog, setIsShowOptionDialog] = useState(false)
     const [selectedCellsNew, setSelectedCellsNew] = useState<Cell[]>([]);
     const [labelValue, setLabelValue] = useState('Hello')
     const [labelColor, setLabelColor] = useState('#000')
     const [bgColor, setBgColor] = useState('#fff')
+    const [stencilStyle, setStencilStyle] = useState({})
     const [historyState, setHistoryState] = useState({ canRedo: false, canUndo: false })
-    const [graphNew, setGraphNew] = useState<Graph>()
+    const [connectorType, setConnectorType] = useState('rounded')
     const commonAttrs = {
         body: {
             fill: '#fff',
@@ -51,11 +62,9 @@ const AntvX6 = () => {
     );
     /** 清除选择状态 */
     const clearCells = useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (graph: { getCells: () => any; }) => {
+        (x6graph: { getCells: () => any; }) => {
             setIsShowOptionDialog(false)
-            const cells = graph.getCells();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cells = x6graph.getCells();
             cells.forEach((cell: any) => {
                 if (cell.isNode()) {
                     // 恢复默认样式并移除工具按钮
@@ -70,7 +79,6 @@ const AntvX6 = () => {
         selectedCellsNew.forEach((cell) => {
             if (cell.isNode()) {
                 // 修改节点的 label 属性
-                console.log(labelColor);
                 // console.log(cell.toJSON);
                 cell.attr('text/text', labelValue);
                 cell.attr('text/fill', labelColor);
@@ -78,279 +86,65 @@ const AntvX6 = () => {
             }
         });
     };
+    //画布保存
+    const saveX6Data = async (imgUrl: string) => {
+        const data = {
+            JsonData: x6Graph?.toJSON(),
+            userId: getUserIDFromLocalStorage(),
+            notebook_id: notebook_id,
+            imgUrl
+        }
+        const res = await addNotebookApi(data)
+        if (res.status == 200) {
+            messageApi.open({
+                type: 'success',
+                content: '保存成功',
+            });
+        }
+    }
     // 撤销恢复等操作合集
     const operate = (type: string) => {
-        if (!graphNew) return;
+        if (!x6Graph) return;
         switch (type) {
             // 撤销
             case 'canUndo':
-                graphNew.canUndo() && graphNew.undo();
+                x6Graph.canUndo() && x6Graph.undo();
                 break;
             // 恢复
             case 'canRedo':
-                graphNew.canRedo() && graphNew.redo();
+                x6Graph.canRedo() && x6Graph.redo();
+                break;
+            // 恢复
+            case 'delete':
+                deleteGraph()
                 break;
             // 保存
             case 'saveToJSON':
-                return graphNew.toJSON();
+                x6Graph.toPNG(saveX6Data)
+                break
             // 导出为PDF
             case 'exportPDF':
-                graphNew.exportSVG(`PDF-${new Date()}`);
-                break;
-
+                x6Graph?.exportPNG(`PDF-${new Date().toISOString().slice(0, 10)}`)
+                break
         }
     };
-    Graph.registerNode(
-        'custom-node',
-        {
-            inherit: 'rect',
-            width: 120, // 增加宽度
-            height: 50, // 增加高度
-            markup: [
-                {
-                    tagName: 'rect',
-                    selector: 'body',
-                },
-                {
-                    tagName: 'image',
-                    selector: 'img',
-                },
-                {
-                    tagName: 'text',
-                    selector: 'label',
-                },
-            ],
-            attrs: {
-                body: {
-                    stroke: '#8f8f8f',
-                    strokeWidth: 1,
-                    fill: '#fff',
-                    rx: 8, // 增加圆角半径
-                    ry: 8,
-                },
-                // img: {
-                //     'xlink:href':
-                //         'https://gw.alipayobjects.com/zos/antfincdn/FLrTNDvlna/antv.png',
-                //     width: 12, // 增加图标大小
-                //     height: 12,
-                //     x: 15,
-                //     y: 15,
-                // },
-            },
-            ports: {
-                groups: {
-                    top: {
-                        position: 'top',
-                        attrs: {
-                            circle: {
-                                magnet: true,
-                                stroke: '#8f8f8f',
-                                r: 6, // 增加连接桩半径
-                                style: {
-                                    visibility: 'hidden'
-                                } // 默认隐藏
-                            },
-                        },
-                    },
-                    bottom: {
-                        position: 'bottom',
-                        attrs: {
-                            circle: {
-                                magnet: true,
-                                stroke: '#8f8f8f',
-                                r: 6,
-                                style: {
-                                    visibility: 'hidden'
-                                } // 默认隐藏
-                            },
-                        },
-                    },
-                    left: {
-                        position: 'left',
-                        attrs: {
-                            circle: {
-                                magnet: true,
-                                stroke: '#8f8f8f',
-                                r: 6,
-                                style: {
-                                    visibility: 'hidden'
-                                } // 默认隐藏
-                            },
-                        },
-                    },
-                    right: {
-                        position: 'right',
-                        attrs: {
-                            circle: {
-                                magnet: true,
-                                stroke: '#8f8f8f',
-                                r: 6,
-                                style: {
-                                    visibility: 'hidden'
-                                } // 默认隐藏
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        true
-    );
+    //删除画布
+    const deleteGraph = async () => {
+        await deleteNotebookApi({ notebook_id })
+        setRouter(-1)
+    }
+    //初始渲染获取JSONData数据并渲染
+    const getJsonData = async (x6graph: Graph) => {
+        if (!notebook_id || notebook_id == '-1') return
+        const res = await getNotebookJsonDataApi({ notebook_id })
+        x6graph?.fromJSON(JSON.parse(res.data.JsonData[0].notebook_data).cells)
 
-    useEffect(() => {
-        if (!containerRef.current) return;
-        const graph = new Graph({
-            container: containerRef.current,
-            width: 800,
-            height: 600,
-            autoResize: true,
-            background: {
-                color: '#F2F7FA',
-            },
-            grid: {
-                visible: true,
-                type: 'doubleMesh',
-                args: [
-                    {
-                        color: '#eee',
-                        thickness: 1,
-                    },
-                    {
-                        color: '#ddd',
-                        thickness: 1,
-                        factor: 4,
-                    },
-                ],
-            },
-            connecting: {
-                allowBlank: false,
-                allowMulti: true,
-                allowLoop: false,
-                allowNode: true,
-                allowEdge: false,
-                //自动规避拦截点
-                // router: 'manhattan',
-                connector: {
-                    name: 'smooth',
-                    args: { radius: 4 }
-                },
-                anchor: 'center',
-                snap: { radius: 20 },
-            },
-            highlighting: {
-                magnetAvailable: {
-                    name: 'stroke',
-                    args: {
-                        attrs: {
-                            fill: '#fff',
-                            stroke: '#3d66f5',
-                            strokeWidth: 4,
-                        },
-                    },
-                },
-                magnetAdsorbed: {
-                    name: 'stroke',
-                    args: {
-                        attrs: {
-                            stroke: '#3d66f5',
-                            strokeWidth: 4,
-                        },
-                    },
-                },
-            },
-        });
-
-        graph.addNode({
-            shape: 'custom-node',
-            x: 40,
-            y: 40,
-            ports: {
-                items: [{
-                    id: 'port_5',
-                    group: 'top',
-                },
-                {
-                    id: 'port_6',
-                    group: 'left',
-                },
-                {
-                    id: 'port_7',
-                    group: 'right',
-                },
-                {
-                    id: 'port_8',
-                    group: 'bottom',
-                },]
-            },
-            label: labelValue,
-            attrs: maxAttrs
-        });
-        graph.addNode({
-            shape: 'custom-node',
-            x: 160,
-            y: 180,
-            label: labelValue,
-            ports: {
-                items: [{
-                    id: 'port_5',
-                    group: 'top',
-                },
-                {
-                    id: 'port_6',
-                    group: 'left',
-                },
-                {
-                    id: 'port_7',
-                    group: 'right',
-                },
-                {
-                    id: 'port_8',
-                    group: 'bottom',
-                },]
-            },
-            attrs: maxAttrs
-
-        });
-        graph.use(
-            new Snapline({
-                enabled: true,
-            })
-        );
-        graph.use(
-            new Transform({
-                resizing: true,
-            })
-        );
-        //快捷键插件
-        graph.use(
-            new Clipboard({
-                enabled: true,
-            })
-        );
-        //快捷键插件
-        graph.use(
-            new Keyboard({
-                enabled: true,
-            })
-        );
-        //框选插件
-        graph.use(
-            new Selection({
-                rubberband: true,
-                rubberEdge: true
-            })
-        )
-        //撤销恢复插件
-        graph.use(
-            new History({
-                enabled: true,
-            }),
-        )
-        //图片导出插件
-        graph.use(new Export())
+    }
+    //创建物料区
+    const createStencil = (x6Graph: Graph) => {
         const stencil = new Stencil({
             title: 'Stencil',
-            target: graph,
+            target: x6Graph,
             search(cell, keyword) {
                 return cell.shape.indexOf(keyword) !== -1;
             },
@@ -371,7 +165,7 @@ const AntvX6 = () => {
             ],
         });
         stencilContainer.current?.appendChild(stencil.container);
-        const n1 = graph.createNode({
+        const n1 = x6Graph.createNode({
             shape: 'rect',
             x: 40,
             y: 40,
@@ -381,7 +175,7 @@ const AntvX6 = () => {
             attrs: commonAttrs,
 
         });
-        const n2 = graph.createNode({
+        const n2 = x6Graph.createNode({
             shape: 'circle',
             x: 180,
             y: 40,
@@ -390,7 +184,7 @@ const AntvX6 = () => {
             label: 'circle',
             attrs: commonAttrs,
         });
-        const n3 = graph.createNode({
+        const n3 = x6Graph.createNode({
             shape: 'custom-node',
             x: 280,
             y: 40,
@@ -419,7 +213,7 @@ const AntvX6 = () => {
                 ],
             },
         });
-        const n4 = graph.createNode({
+        const n4 = x6Graph.createNode({
             shape: 'path',
             x: 420,
             y: 40,
@@ -438,104 +232,61 @@ const AntvX6 = () => {
         });
         stencil.load([n1, n2], 'group1');
         stencil.load([n3, n4], 'group2');
-
-        // 监听鼠标悬浮事件
-        graph.on('cell:mouseenter', (event) => {
-            const cell = event.cell
-            if (cell.isNode()) {
-                showPorts(true)
+    }
+    //初始化X6
+    const { x6Graph } = useAntvX6({ container: containerRef, connectorType })
+    // x6Graph && getGraph?.(x6Graph);
+    useEffect(() => {
+        if (x6Graph) {
+            //监听类型显示不同的画布
+            switch (notebook_type) {
+                case 'base':
+                    createStencil(x6Graph)
+                    initBaseX6({
+                        x6Graph, showPorts, clearCells, setSelectedCellsNew, setLabelValue,
+                        setLabelColor, setBgColor, setIsShowOptionDialog, setHistoryState
+                    })
+                    break;
+                case 'mind_map':
+                    setStencilStyle({ display: 'none' })
+                    setConnectorType('smooth')
+                    initMindMapX6({
+                        x6Graph, showPorts, clearCells, setSelectedCellsNew, setLabelValue,
+                        setLabelColor, setBgColor, setIsShowOptionDialog, setHistoryState
+                    })
+                    break;
+                default:
+                    break;
             }
-        });
-        // 监听鼠标悬浮事件
-        graph.on('cell:mouseleave', (event) => {
-            const cell = event.cell
-            if (cell.isNode()) {
-                showPorts(false)
-            }
-        });
-        //复制
-        graph.bindKey('ctrl+c', () => {
-            const cells = graph.getSelectedCells()
-            if (cells.length) {
-                graph.copy(cells)
-            }
-            return false
-        })
-        //粘贴
-        graph.bindKey('ctrl+v', () => {
-            if (!graph.isClipboardEmpty()) {
-                const cells = graph.paste({ offset: 32 })
-                graph.cleanSelection()
-                graph.select(cells)
-            }
-            return false
-        })
-        // 监听框选事件
-        graph.on('selection:changed', () => {
-            clearCells(graph)
-            const selectedCells = graph.getSelectedCells();
-            setSelectedCellsNew(selectedCells)
-            selectedCells.forEach((cell) => {
-                if (cell.isNode()) {
-                    // 类似点击后的效果，比如改变边框颜色
-                    cell.attr('body/stroke', 'blue');
-                    cell.addTools(['button-remove']);
-                    // console.log(cell.toJSON())
-                }
-            });
-            // graph.batchUpdate(() => {
-
-            // });
-
-        });
-        // 监听画布点击事件
-        graph.on('blank:click', () => {
-
-            clearCells(graph)
-        });
-        // 监听画布点击事件
-        graph.on('node:dblclick', () => {
-            const selectedCells = graph.getSelectedCells();
-            if (selectedCells[0].attrs && selectedCells.length <= 1) {
-                const selectLabelValue = selectedCells[0].attrs.text.text
-                const selectLabelColor = selectedCells[0].attrs.text.fill
-                const selectBgColor = selectedCells[0].attrs.body.fill
-                setLabelValue(selectLabelValue as string)
-                setLabelColor(selectLabelColor as string)
-                setBgColor(selectBgColor as string)
-
-            }
-            setIsShowOptionDialog(true)
-        });
-        // 监听历史操作，修改按钮状态
-        graph.on('history:change', () => {
-            setHistoryState({ canRedo: graph.canRedo(), canUndo: graph.canUndo(), })
-        })
-        graph.centerContent()
-        setGraphNew(graph)
-    }, []);
-
+            getJsonData(x6Graph)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [x6Graph, notebook_type])
     return (
-        <div className="x6-box" id={`x6-box`}>
-            <div ref={stencilContainer} className="x6-box-stencilContainer"></div>
-            <div ref={containerRef} className="x6-box-container" id={`x6-box-container`}></div>
-            <FunctionalZone
-                historyState={historyState}
-                operate={operate}
-            />
-            {isShowOptionDialog && <OptionDialog
-                handleButtonClick={handleButtonClick}
-                labelValue={labelValue}
-                labelColor={labelColor}
-                bgColor={bgColor}
-                setLabelValue={setLabelValue}
-                setLabelColor={setLabelColor}
-                setBgColor={setBgColor}
-                setIsShowOptionDialog={setIsShowOptionDialog}
+        <>
+            {contextHolder}
+            <div className="x6-box" id={`x6-box`}>
+                {<div ref={stencilContainer} className="x6-box-stencilContainer" style={stencilStyle}></div>}
+                <div ref={containerRef} className="x6-box-container" id={`x6-box-container`}></div>
+                <FunctionalZone
+                    historyState={historyState}
+                    operate={operate}
+                    notebook_id={notebook_id || '-1'}
+                />
+                {isShowOptionDialog && <OptionDialog
+                    handleButtonClick={handleButtonClick}
+                    labelValue={labelValue}
+                    labelColor={labelColor}
+                    bgColor={bgColor}
+                    setLabelValue={setLabelValue}
+                    setLabelColor={setLabelColor}
+                    setBgColor={setBgColor}
+                    setIsShowOptionDialog={setIsShowOptionDialog}
 
-            >
-            </OptionDialog>}
-        </div>
+                >
+                </OptionDialog>}
+            </div></>
+
     );
 };
 

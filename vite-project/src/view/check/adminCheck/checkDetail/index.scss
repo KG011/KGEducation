@@ -1,0 +1,12 @@
+#root .ant-table-wrapper{
+    height: calc(100% - 40px);
+    .ant-spin-nested-loading{
+        height: 100%;
+        .ant-spin-container{
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    }
+}

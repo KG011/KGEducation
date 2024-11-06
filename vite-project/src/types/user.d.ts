@@ -9,3 +9,4 @@ interface LoginData {
     username: string,
     password: string
 }
+declare module '@antv/hierarchy';

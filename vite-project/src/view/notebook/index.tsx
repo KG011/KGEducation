@@ -17,7 +17,7 @@ const Notebook: React.FC = () => {
                     {
                         label: '我的笔记',
                         key: '1',
-                        children: <MyNotebook jumpRouter={itemSetRouter}></MyNotebook>,
+                        children: <MyNotebook  jumpRouter={itemSetRouter}></MyNotebook>,
                     },
                     {
                         label: '笔记共享区',

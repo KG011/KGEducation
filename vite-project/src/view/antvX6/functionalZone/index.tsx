@@ -1,35 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
 import './index.scss'
-import { Button, message } from "antd";
+import { Button, Popconfirm } from "antd";
 import { LeftCircleOutlined, LoginOutlined, LogoutOutlined, MenuUnfoldOutlined, PicLeftOutlined, } from '@ant-design/icons';
+// import { addNotebookApi } from "@/config/apis/modules/course";
+// import { getUserIDFromLocalStorage } from '@/utils/storage'
+import { useGlobalContext } from "@/context/Global";
 interface FunctionalZoneProps {
     historyState: historyState
     operate: (str: string) => void
+    notebook_id?:string
 }
 interface historyState {
     canUndo: boolean
     canRedo: boolean
 }
 const FunctionalZone: React.FC<FunctionalZoneProps> = (props) => {
-    const { historyState, operate } = props
-    const [loadings, setLoadings] = useState<boolean>(false);
-    const [messageApi, contextHolder] = message.useMessage();
+    const { setRouter } = useGlobalContext()
+    const { historyState, operate,notebook_id } = props
+    // const [loadings, setLoadings] = useState<boolean>(false);
 
     const btnList = [
         {
             key: '退出',
             icon: <LeftCircleOutlined />,
-            onClick: () => operate('canUndo'),
+            onClick: () => setRouter(-1),
             disabled: false,
-            loading:false
-            // danger:true
+            loading: false,
         },
         {
             key: '撤销',
             icon: <LogoutOutlined />,
             onClick: () => operate('canUndo'),
             disabled: !historyState.canUndo,
-            loading:false
+            loading: false
             // danger:true
         },
         {
@@ -37,15 +40,22 @@ const FunctionalZone: React.FC<FunctionalZoneProps> = (props) => {
             icon: <LoginOutlined />,
             onClick: () => operate('canRedo'),
             disabled: !historyState.canRedo,
-            loading:false
+            loading: false
             // danger:true
+        },
+        {
+            key: '删除',
+            icon: <LeftCircleOutlined />,
+            disabled: notebook_id=='-1',
+            loading: false,
+            danger: true
         },
         {
             key: '保存',
             icon: <MenuUnfoldOutlined />,
-            onClick: () => saveX6Data(),
+            onClick: () => operate('saveToJSON'),
             disabled: false,
-            loading:loadings
+            // loading: loadings
             // danger:true
         },
         {
@@ -53,39 +63,48 @@ const FunctionalZone: React.FC<FunctionalZoneProps> = (props) => {
             icon: <PicLeftOutlined />,
             onClick: () => operate('exportPDF'),
             disabled: false,
-            loading:false
+            loading: false
             // danger:true
         },
     ]
-    const saveX6Data = () => {
-        setLoadings(true)
-        const JsonData = operate('saveToJSON')
-        console.log(JsonData);
-        setTimeout(() => {
-            setLoadings(false)
-            messageApi.open({
-                type: 'success',
-                content: '保存成功',
-            });
-        }, 2000);
-    }
+    
     return (
         <>
-            {contextHolder}
+            {/* {contextHolder} */}
             <div className="x6-box-header">
                 {btnList.map((btnItem) => {
                     return (
                         <div className="x6-box-header-btn" key={btnItem.key}>
-                            <Button
-                                type="primary"
-                                icon={btnItem.icon}
-                                iconPosition={'start'}
-                                disabled={btnItem.disabled}
-                                onClick={btnItem.onClick}
-                                loading={btnItem.loading}
-                            >
-                                {btnItem.key}
-                            </Button>
+                            {btnItem.key !== '删除' ? (
+                                <Button
+                                    type="primary"
+                                    icon={btnItem.icon}
+                                    iconPosition={'start'}
+                                    disabled={btnItem.disabled}
+                                    onClick={btnItem.onClick}
+                                    loading={btnItem.loading}
+                                    danger={btnItem.danger}
+                                >
+                                    {btnItem.key}
+                                </Button>
+                            ) : (
+                                <Popconfirm
+                                    title="确定要删除此画布吗？"
+                                    onConfirm={() => operate('delete')}
+                                    okText="确定"
+                                    cancelText="取消">
+                                    <Button
+                                        type="primary"
+                                        icon={btnItem.icon}
+                                        iconPosition={'start'}
+                                        disabled={btnItem.disabled}
+                                        onClick={btnItem.onClick}
+                                        loading={btnItem.loading}
+                                        danger={btnItem.danger}
+                                    >
+                                        {btnItem.key}
+                                    </Button>
+                                </Popconfirm>)}
                         </div>
                     )
                 })}

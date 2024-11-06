@@ -12,20 +12,6 @@ const Course: React.FC = () => {
     const courseName = searchParams.get('course_name');
 
     const [detailLabel, setDetailLabel] = useState('')
-    // useEffect(() => {
-    //     const fetchCourseData = async () => {
-    //       try {
-    //         const response = await axios.get(`/api/course/${courseId}`);
-    //         setCourseData(response.data);
-    //       } catch (error) {
-    //         console.error('Error fetching course data:', error);
-    //       }
-    //     };
-
-    //     if (courseId) {
-    //       fetchCourseData();
-    //     }
-    //   }, [courseId]);
     return (
         <>
             <div className="container-head">
@@ -35,7 +21,7 @@ const Course: React.FC = () => {
             </div>
             <div className="container course-container">
                 <CourseMenu setDetailLabel={setDetailLabel}></CourseMenu>
-                <CourseDetail label={detailLabel}></CourseDetail>
+                <CourseDetail label={detailLabel} courseName={courseName||''}></CourseDetail>
             </div>
         </>
     )

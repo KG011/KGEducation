@@ -1,9 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { To, useNavigate } from "react-router-dom";
 
 interface GlobalProps {
   // 路由设置
-  setRouter: (router: string) => void;
+  setRouter: (router: string|number) => void;
   setUserInfo: (number: number) => void;
   setOpenModel: (bol: boolean) => void;
   userInfo: number;
@@ -26,9 +26,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isPhotoShow, setIsPhotoShow] = React.useState(false)
   //路由跳转
   const Navigate = useNavigate();
-  const routerFunction = (router: string) => {
+  const routerFunction = (router: string|number) => {
     if (!router) return;
-    Navigate(router)
+    Navigate(router as To)
   };
   return (
     <GlobalContext.Provider value={{

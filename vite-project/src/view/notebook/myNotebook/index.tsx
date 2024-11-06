@@ -1,56 +1,75 @@
 import React from 'react';
 import '../index.scss'
-import { getMyCourseApi } from '@/config/apis/modules/course';
-import courseImage from '@/assets/course1.png';
+import { getMyNotebookApi } from '@/config/apis/modules/course';
+// import courseImage from '@/assets/course1.png';
 import { useGlobalContext } from '@/context/Global';
-import courseImg from '@/assets/course1.png'
-import PhotoShow from '@/components/photoShow';
-import { Button } from 'antd';
+// import courseImg from '@/assets/course1.png'
+// import PhotoShow from '@/components/photoShow';
+import { getUserIDFromLocalStorage } from '@/utils/storage'
+import { Button, FloatButton, Image } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import ModalComponent from '@/components/Modal';
+import NewNotebook from '@/components/newNotebook';
+
+
 interface MyNotebookProps {
     jumpRouter: (path: string) => void
 }
-const MyNotebook: React.FC<MyNotebookProps> = (props) => {
-    const { userInfo, setIsPhotoShow } = useGlobalContext()
-    const { jumpRouter } = props
-    const [courseList, setCourseList] = React.useState(new Array(20).fill({ label: '2' }))
+interface NotebookData {
+    user_name: string;
+    notebookList: Array<{ [name: string]: string }>
+}
+const MyNotebook: React.FC<MyNotebookProps> = () => {
+    const { userInfo, setIsPhotoShow, setRouter, setOpenModel } = useGlobalContext()
+    const [notebookData, setNotebookData] = React.useState<NotebookData>()
     React.useEffect(() => {
-        const myCourseData = async () => {
+        const myNotebookData = async () => {
             try {
-                const response = await getMyCourseApi({ userId: userInfo, role: 'student' });
+                const response = await getMyNotebookApi({ userId: getUserIDFromLocalStorage() });
                 if (response.data.status == 500) {
-                    jumpRouter('/login')
+                    setRouter('/login')
                 }
                 //更新我的课程列表
-                setCourseList(response.data.courseList)
+                setNotebookData(response.data.notebookData)
             } catch (error) {
-
                 console.error('Error fetching menu data:', error);
             }
         };
-        myCourseData();
-    }, [jumpRouter, userInfo])
+        myNotebookData();
+    }, [setRouter, userInfo])
     return (
         <>
             <div className="education-cantainer">
-                {courseList.map((item, index) => {
+                {notebookData?.notebookList?.map((item, index) => {
                     return (
                         <div key={index} className="edu-item" >
                             <div className="edu-item-img" onClick={() => setIsPhotoShow(true)}>
-                                <img src={courseImage} alt={item.course_name} />
+                                <Image
+                                    width={'100%'}
+                                    height={'100%'}
+                                    src={item.imgUrl}
+                                />
                             </div>
-                            <div className="edu-item-label notebook-label">
-                                {/* <span className='edu-item-label-course'>{item.course_name}</span> */}
-                                <span className='edu-item-label-teacher'>制作人：{item.teacher_name}</span>
-                                <Button type="link"  style={{float:'right'}}>
+                            <div className="notebook-label">
+                                <span className='edu-item-label-teacher'>制作人：{notebookData.user_name}</span>
+                                <Button type="link" onClick={() => setRouter(`/antvX6?notebook_type=base&notebook_id=${item.notebook_id}`)}>
                                     在线编排
                                 </Button>
                             </div>
                         </div>
                     )
                 })}
-
+                <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
+                    <FloatButton icon={<QuestionCircleOutlined />} />
+                    <FloatButton tooltip={<div>创建新笔记</div>} onClick={() => { setOpenModel(true) }} />
+                    <FloatButton.BackTop visibilityHeight={0} />
+                </FloatButton.Group>
             </div>
-            <PhotoShow imgSrc={courseImg}></PhotoShow>
+
+            <ModalComponent title='创建新笔记' notFooter={true}>
+                <NewNotebook></NewNotebook>
+            </ModalComponent>
+            {/* <PhotoShow imgSrc={courseImg}></PhotoShow> */}
         </>
     )
 }

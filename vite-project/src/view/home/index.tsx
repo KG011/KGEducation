@@ -4,78 +4,81 @@ import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
 import KGHeader from '@/components/KGHeader'
 import './index.scss'
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useGlobalContext } from '@/context/Global';
 import { getFriendListApi } from '@/config/apis';
 // import RouterWrapper from '@/router';
 type MenuItem = Required<MenuProps>['items'][number];
 
-const items: MenuItem[] = [
-    {
-        key: '首页',
-        label: '首页',
-        icon: <HomeOutlined />,
-    },
-    {
-        key: '待办',
-        label: '待办',
-        icon: <ReadOutlined />,
-        children: [
-            { key: '学员考试', label: '学员考试', icon:<EditOutlined />, },
-            {
-                key: '考试操作',
-                label: '考试操作', icon:<SnippetsOutlined />,
-                children: [
-                    { key: '考试发布', label: '考试发布' },
-                    { key: '考试修改', label: '考试修改' },
-                ],
-            },
-        ],
-    },
-    {
-        key: '笔记',
-        label: '笔记',
-        icon: <FileSearchOutlined />,
-    },
-    {
-        key: '成绩',
-        label: '成绩',
-        icon: <LineChartOutlined />,
-        children: [
-            { key: '计算机原理', label: '计算机原理' },
-            { key: '数据结构与算法', label: '数据结构与算法' },
-            { key: '计算机网络', label: '计算机网络' },
-        ],
-    },
-    {
-        type: 'divider',
-    },
-    {
-        key: '联系人',
-        label: '联系人',
-        icon: <UserOutlined />,
-        children: [
-            { key: '12', label: '张三' },
-            { key: '13', label: '李逵' },
-            { key: '14', label: '宋江' },
-            { key: '15', label: '智多星' },
-        ],
-    },
-    {
-        key: '群聊',
-        label: '所在群聊',
-        type: 'group',
-        children: [
-            { key: '16', label: '群聊1' },
-            { key: '17', label: '群聊2' },
-        ],
-    },
-];
+
 
 const Home: React.FC = () => {
     const { setRouter } = useGlobalContext()
+    const items: MenuItem[] = [
+        {
+            key: '/home/default',
+            label: '首页',
+            icon: <HomeOutlined />,
+        },
+        {
+            key: '待办',
+            label: '待办',
+            icon: <ReadOutlined />,
+            children: [
+                { key: '/home/backlog', label: '学员考试', icon: <EditOutlined />, disabled: localStorage.getItem('role') === 'teacher'?true:false },
+                {
+                    key: '考试操作',
+                    label: '考试操作', icon: <SnippetsOutlined />,
+                    children: [
+                        { key: '/home/JobPosting', label: '考试发布' },
+                        { key: '/home/check', label: '考试修改' },
+                    ],
+                    disabled: localStorage.getItem('role') === 'student'
+                },
+            ],
+        },
+        {
+            key: '/home/notebook',
+            label: '笔记',
+            icon: <FileSearchOutlined />,
+        },
+        {
+            key: '成绩',
+            label: '成绩',
+            icon: <LineChartOutlined />,
+            children: [
+                { key: '/antvX6', label: '计算机原理' },
+                { key: '数据结构与算法', label: '数据结构与算法' },
+                { key: '计算机网络', label: '计算机网络' },
+            ],
+        },
+        {
+            type: 'divider',
+        },
+        {
+            key: '联系人',
+            label: '联系人',
+            icon: <UserOutlined />,
+            children: [
+                { key: '12', label: '张三' },
+                { key: '13', label: '李逵' },
+                { key: '14', label: '宋江' },
+                { key: '15', label: '智多星' },
+            ],
+        },
+        {
+            key: '群聊',
+            label: '所在群聊',
+            type: 'group',
+            children: [
+                { key: '16', label: '群聊1' },
+                { key: '17', label: '群聊2' },
+            ],
+        },
+    ];
     const [menuList, setMenuList] = useState(items);
-
+    const location = useLocation()
+    const [defaultSelectedKeys, setDefaultSelectedKeys] = useState('/home')
     useEffect(() => {
         const menuListData = async () => {
             try {
@@ -98,27 +101,21 @@ const Home: React.FC = () => {
 
         menuListData();
     }, []);
+    useEffect(() => {
+        switch (location.pathname) {
+            default:
+                setDefaultSelectedKeys(location.pathname)
+                break;
+        }
+    }, [location])
     const onClick: MenuProps['onClick'] = (e) => {
-        console.log('click ', e.key);
         if (e.key.includes('friend')) {
             setRouter('/home/userList')
             return
         }
         switch (e.key) {
-            case '计算机原理':
-                setRouter('/antvX6')
-                break;
-            case '笔记':
-                setRouter('/home/notebook')
-                break;
-            case '学员考试':
-                setRouter('/home/exam')
-                break;
-            case '考试发布':
-                setRouter('/home/JobPosting')
-                break;
             default:
-                setRouter('/home/default')
+                setRouter(e.key)
                 break;
         }
     };
@@ -130,8 +127,8 @@ const Home: React.FC = () => {
                 <Menu
                     onClick={onClick}
                     style={{ width: 256 }}
-                    defaultSelectedKeys={['首页']}
-                    defaultOpenKeys={['sub1']}
+                    selectedKeys={[defaultSelectedKeys]}
+                    // defaultOpenKeys={[defaultOpenKeys]}
                     mode="inline"
                     items={menuList}
                 />
