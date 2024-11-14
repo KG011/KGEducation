@@ -255,7 +255,6 @@ exports.deleteNotebookApi = (req, res) => {
         });
     });
 }
-
 //添加新的考试
 exports.addExamApi = (req, res) => {
     const data = req.body;
@@ -268,39 +267,43 @@ exports.addExamApi = (req, res) => {
             return res.send({ status: 501, msg: err.message });
         }
         const course_id = results[0].id
-        const selectStuSql = "SELECT * FROM student_course WHERE course_id=?;";
-        db.query(selectStuSql, course_id, (err, StuResults) => {
-            if (err) {
-                return res.send({ status: 501, msg: err.message });
-            }
-            const selectStuNameSql = "SELECT real_name FROM users WHERE id=?;";
-            const insertExamTableSql = `INSERT INTO exam_table (course_id, course_name,student_name,grade,tags) VALUES (?,?,?,?,?)`;
-            StuResults.forEach((item) => {
-                db.query(selectStuNameSql, item.student_id, (err, stu) => {
-                    if (err) {
-                        return res.send({ status: 501, msg: err.message });
-                    }
-                    const student_name = stu[0].real_name
-                    db.query(insertExamTableSql, [course_id, data.course_name, student_name, data.grade,tags], (err, results) => {
-                        if (err) {
-                            return res.send({ status: 500, msg: err.message });
-                        }
-                    });
-                })
-            })
-
-        })
         // 插入到我的exam
-        const insertExamSql = `INSERT INTO exam (course_id, course_name,teacher_name,exam_data) VALUES (?,?,?,?)`;
-        db.query(insertExamSql, [course_id, data.course_name, data.teacher_name, exam_data], (err, results) => {
+        const insertExamSql = `INSERT INTO exam (course_id, course_name,teacher_name,exam_data,Date) VALUES (?,?,?,?,?)`;
+        db.query(insertExamSql, [course_id, data.course_name, data.teacher_name, exam_data, data.Date], (err, Examresults) => {
             if (err) {
                 return res.send({ status: 500, msg: err.message });
             }
+            const exam_id = Examresults.insertId; // 获取插入后的自增长id值
+            const selectStuSql = "SELECT * FROM student_course WHERE course_id=?;";
+            db.query(selectStuSql, course_id, (err, StuResults) => {
+                if (err) {
+                    return res.send({ status: 501, msg: err.message });
+                }
+                const selectStuNameSql = "SELECT real_name FROM users WHERE id=?;";
+                const insertExamTableSql = `INSERT INTO exam_table (course_id, course_name,student_name,grade,tags,Date,exam_id) VALUES (?,?,?,?,?,?,?)`;
+
+                StuResults.forEach((item) => {
+                    db.query(selectStuNameSql, item.student_id, (err, stu) => {
+                        if (err) {
+                            return res.send({ status: 501, msg: err.message });
+                        }
+                        const student_name = stu[0].real_name
+                        db.query(insertExamTableSql, [course_id, data.course_name, student_name, data.grade, tags, data.Date,exam_id], (err, results) => {
+                            if (err) {
+                                return res.send({ status: 500, msg: err.message });
+                            }
+                        });
+                    })
+                })
+
+            })
             res.send({
                 status: 200,
                 msg: "添加考试到Exam表成功",
             });
         });
+
+
     })
 
 }
@@ -353,16 +356,16 @@ exports.getBacklogExamApi = (req, res) => {
 exports.submitExamApi = (req, res) => {
     const data = req.body;
     const answer_data = JSON.stringify(data.answer_data)
-    const tags=JSON.stringify(data.tags)
+    const tags = JSON.stringify(data.tags)
     const updateTagsSql = 'UPDATE exam_table SET tags =? WHERE course_name =? AND student_name =?;';
-    db.query(updateTagsSql, [tags, data.course_name,data.student_name], (err, results) => {
+    db.query(updateTagsSql, [tags, data.course_name, data.student_name], (err, results) => {
         if (err) {
             return res.send({ status: 501, msg: err.message });
         }
     });
     //插入到exam_check表
-    const insertExamCheckSql = `INSERT INTO exam_check (student_id, course_name,teacher_name,answer_data,student_name) VALUES (?,?,?,?,?)`;
-    db.query(insertExamCheckSql, [data.student_id, data.course_name, data.teacher_name, answer_data, data.student_name], (err, results) => {
+    const insertExamCheckSql = `INSERT INTO exam_check (student_id, course_name,teacher_name,answer_data,student_name,exam_id,totalGrade) VALUES (?,?,?,?,?,?,?)`;
+    db.query(insertExamCheckSql, [data.student_id, data.course_name, data.teacher_name, answer_data, data.student_name, data.exam_id,data.totalGrade], (err, results) => {
         if (err) {
             return res.send({ status: 500, msg: err.message });
         }
@@ -373,6 +376,21 @@ exports.submitExamApi = (req, res) => {
     });
 
 }
+//获取考试待办
+exports.getBacklogExamTeaApi = (req, res) => {
+    const selectExamSql = "SELECT * FROM exam WHERE exam_id=?;";
+    db.query(selectExamSql, req.body.exam_id, (err, results) => {
+        if (err) {
+            return res.send({ status: 501, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            msg: "获取成功",
+            examList: results,
+        });
+    });
+
+};
 // 获取我的待修改课程
 exports.getMyExamCheckApi = (req, res) => {
     const selectExamSql = "SELECT * FROM exam WHERE teacher_name=?;";
@@ -388,43 +406,52 @@ exports.getMyExamCheckApi = (req, res) => {
     });
 
 };
-// 获取课程详细信息
-exports.getExamCheckApi = (req, res) => {
-    const data = req.body
-    const exam_data = {}
-    const selectExamSql = "SELECT * FROM exam_check WHERE teacher_name=? AND course_name =?;";
-    db.query(selectExamSql, [data.teacher_name, data.course_name], (err, result) => {
-        if (err) {
-            return res.send({ status: 501, msg: err.message });
-        }
-        exam_data['examData'] = result
-        const selectCourseIdSql = "SELECT id FROM all_course WHERE course_name =?;";
-        db.query(selectCourseIdSql, data.course_name, (err, CourseResult) => {
+// 获取是否已经答题
+exports.checkIsHaveExamApi = (req, res) => {
+    const { examId_list,student_id } = req.body;
+    const resultMap = {};
+    const checkExistenceForEachId = (examId) => {
+        const selectExamSql = "SELECT * FROM exam_check WHERE exam_id=? AND student_id=?;";
+        db.query(selectExamSql, [examId,student_id], (err, results) => {
             if (err) {
-                return res.send({ status: 501, msg: err.message });
+                return res.send({ status: 501, msg: err.message });; 
             }
-            const course_id = CourseResult[0].id
-            const selectStuSql = "SELECT * FROM student_course WHERE course_id =?;";
-            db.query(selectStuSql, course_id, (err, results) => {
-                if (err) {
-                    return res.send({ status: 501, msg: err.message });
-                }
-                exam_data['studentList'] = results
+            resultMap[examId] = results.length > 0;
+            // 检查是否所有的exam_id都已经查询完成，如果都完成了则返回结果
+            if (Object.keys(resultMap).length === examId_list.length) {
                 res.send({
                     status: 200,
                     msg: "获取成功",
-                    exam_data,
+                    examList: resultMap
                 });
-            })
-        })
+            }
+        });
+    };
+    examId_list.forEach(checkExistenceForEachId);
 
+};
+
+// 获取课程详细信息
+exports.getExamCheckApi = (req, res) => {
+    const data = req.body
+    const selectExamSql = "SELECT * FROM exam_check WHERE student_name=? AND exam_id =?;";
+    db.query(selectExamSql, [data.student_name, data.exam_id], (err, result) => {
+        if (err) {
+            return res.send({ status: 501, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            msg: "获取成功",
+            exam_data: result,
+        });
     });
 
 };
 // 获取课程Table学生信息
 exports.getExamTableApi = (req, res) => {
-    const selectExamTableSql = "SELECT * FROM exam_table WHERE course_name=?;";
-    db.query(selectExamTableSql, req.body.course_name, (err, results) => {
+    const data = req.body
+    const selectExamTableSql = "SELECT * FROM exam_table WHERE course_name=? AND exam_id=?;";
+    db.query(selectExamTableSql, [data.course_name, data.exam_id], (err, results) => {
         if (err) {
             return res.send({ status: 501, msg: err.message });
         }
@@ -436,5 +463,98 @@ exports.getExamTableApi = (req, res) => {
     });
 
 };
+//修改答卷
+exports.editExamApi = (req, res) => {
+    const { student_name, exam_id, newGrade, newTags } = req.body;
+    const tags = JSON.stringify(newTags)
+    const updateSql = 'UPDATE exam_table SET grade =?, tags =? WHERE student_name =? AND exam_id =?';
+    db.query(updateSql, [newGrade, tags, student_name, exam_id], (err, results) => {
+        if (err) {
+            return res.send({ status: 501, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            msg: "更新成功",
+        });
+    });
+};
 
+//插入到exam_grade表,生成可视化图表
+exports.sumbitGradeApi = (req, res) => {
+    const data = req.body
+    const student_list = JSON.stringify(data.student_list)
+    const grade_list = JSON.stringify(data.grade_list)
+    // 首先查询是否已存在相同exam_id的记录
+    const checkExistSql = `SELECT * FROM exam_grade WHERE exam_id =?`;
+    db.query(checkExistSql, [data.exam_id], (checkErr, checkResults) => {
+        if (checkErr) {
+            return res.send({ status: 500, msg: checkErr.message });
+        }
+        if (checkResults.length > 0) {
+            // 如果存在，执行更新操作
+            const updateExamGradeSql = `UPDATE exam_grade SET student_list =?, grade_list =?, totalGrade=? WHERE exam_id =?`;
+            db.query(updateExamGradeSql, [student_list, grade_list,data.totalGrade, data.exam_id], (updateErr, updateResults) => {
+                if (updateErr) {
+                    return res.send({ status: 500, msg: updateErr.message });
+                }
+                res.send({
+                    status: 200,
+                    msg: "更新Exam_grade表中对应考试信息成功",
+                });
+            });
+        } else {
+            // 如果不存在，执行插入操作
+            const insertExamGradeSql = `INSERT INTO exam_grade (student_list, grade_list, exam_id,totalGrade) VALUES (?,?,?,?)`;
+            db.query(insertExamGradeSql, [student_list, grade_list, data.exam_id,data.totalGrade], (insertErr, insertResults) => {
+                if (insertErr) {
+                    return res.send({ status: 500, msg: insertErr.message });
+                }
+                const insertExamGradeListSql = `INSERT INTO exam_grade_list (exam_id,course_name,Date) VALUES (?,?,?)`;
+                db.query(insertExamGradeListSql, [data.exam_id, data.course_name, data.Date], (insertListErr, insertResults) => {
+                    if (insertListErr) {
+                        return res.send({ status: 500, msg: insertErr.message });
+                    }
+                    res.send({
+                        status: 200,
+                        msg: "添加考试到Exam_grade表成功",
+                    });
+                });
+
+            });
+        }
+    });
+}
+
+
+// 获取可视化图数据信息
+exports.getGradeListapi = (req, res) => {
+    const selectSql = "select * from exam_grade_list;";
+    db.query(selectSql, (err, results) => {
+        // 执行 selectSql 语句失败
+        if (err) {
+            return res.send({ status: 500, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            msg: "获取成功",
+            gradeList: results,
+        });
+    });
+}
+// 获取可视化图数据信息
+exports.getExamGradeApi = (req, res) => {
+    const data = req.body
+    const selectExamGradeSql = "SELECT * FROM exam_grade WHERE exam_id=?;";
+    db.query(selectExamGradeSql, [data.exam_id], (err, results) => {
+        if (err) {
+            return res.send({ status: 501, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            msg: "获取成功",
+            exam_grade: results,
+        });
+    });
+
+}
 

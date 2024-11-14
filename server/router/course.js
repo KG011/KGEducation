@@ -15,9 +15,16 @@ router.post("/getNotebookJsonDataApi", controllers.getNotebookJsonDataApi);
 router.post("/deleteNotebookApi", controllers.deleteNotebookApi);
 router.post("/addExamApi", controllers.addExamApi);
 router.post("/getBacklogExamApi", controllers.getBacklogExamApi);
+router.post("/getBacklogExamTeaApi", controllers.getBacklogExamTeaApi);
 router.post("/submitExamApi", controllers.submitExamApi);
 router.post("/getMyExamCheckApi", controllers.getMyExamCheckApi);
 router.post("/getExamCheckApi", controllers.getExamCheckApi);
 router.post("/getExamTableApi", controllers.getExamTableApi);
+router.post("/editExamApi", controllers.editExamApi);
+router.post("/sumbitGradeApi", controllers.sumbitGradeApi);
+router.get("/getGradeListapi", controllers.getGradeListapi);
+router.post("/getExamGradeApi", controllers.getExamGradeApi);
+router.post("/checkIsHaveExamApi", controllers.checkIsHaveExamApi);
+
 // 导出router
 module.exports = router;
