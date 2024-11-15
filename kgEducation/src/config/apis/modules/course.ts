@@ -87,6 +87,23 @@ export const getExamGradeApi = (data:object) => {
 export const checkIsHaveExamApi = (data:object) => {
     return fetch.post('/course/checkIsHaveExamApi',data)
 }
+//获取课程学员名单
+export const getCourseMemberApi = (data:object) => {
+    return fetch.post('/course/getCourseMemberApi',data)
+}
+
+//获取课程学员名单
+export const getStudentListApi = () => {
+    return fetch.get('/course/getStudentListApi')
+}
+
+//邀请学员
+export const onInviteStuApi = (data:object) => {
+    return fetch.post('/course/onInviteStuApi',data)
+}
+
+
+
 
 
 

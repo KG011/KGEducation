@@ -172,7 +172,7 @@ const CheckDetail = () => {
             return false;
         }
         return tableData.every((item) => {
-            return String(item.tags) == '已提交','已修改'
+            return String(item.tags) === '已提交,已修改'
         })
     }
     const sumbitGrade=async()=>{
@@ -212,6 +212,7 @@ const CheckDetail = () => {
                     <span>{course_name + '(' + Date + ')'}</span>
                     <span style={{ cursor: "pointer", color: '#fff' }}
                         onClick={() => {
+                            console.log(checkTags());
                             if (!checkTags()) {
                                 message.error('还有学员的答卷未提交或未更改！');
                                 return

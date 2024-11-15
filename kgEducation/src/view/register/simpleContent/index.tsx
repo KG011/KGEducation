@@ -18,7 +18,7 @@ const SimpleContent: React.FC = () => {
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     console.log("Success:", values);
   };
-  const onLogin = async () => {
+  const onRegister = async () => {
     const judeg = await checkLogin()
     if (judeg) setRouter('/home')
   }
@@ -52,7 +52,7 @@ const SimpleContent: React.FC = () => {
         />
       </Form.Item>
       <Form.Item>
-        <Button block type="primary" htmlType="submit" onClick={() => onLogin()}>
+        <Button block type="primary" htmlType="submit" onClick={() => onRegister()}>
           注册
         </Button>
       </Form.Item>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {  useCallback, useEffect, useState } from 'react';
 import { Form, Input, Button, Select, Space, message } from 'antd';
 import './index.scss'
 import { addExamApi, getTeacherCourse } from '@/config/apis/modules/course';
@@ -14,6 +14,7 @@ const formItemLayoutWithOutLabel = {
 const JobPosting = () => {
     const [form] = Form.useForm();
     const [questionsTheme, setQuestionsTheme] = useState('');
+    const [questionsTitle, setQuestionsTitle] = useState('');
     //课程数据
     const defaultQuestion = { questionId: Math.random().toString(36).substring(2) + Date.now(), questionText: '', questionGrade: '', type: 'text', options: { 'A': '', 'B': "", 'C': '', 'D': '' } }
     const [courseList, setCourseList] = useState(new Array(20).fill({ label: '2' }))
@@ -37,6 +38,10 @@ const JobPosting = () => {
     //课程名切换
     const mainTypeChange = (value: string) => {
         setQuestionsTheme(value)
+    }
+    //考试题目输入
+    const mainTitleChange = (value: string) => {
+        setQuestionsTitle(value)
     }
     //问题内容更改
     const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
@@ -86,12 +91,14 @@ const JobPosting = () => {
                 return
             } else {
                 const reqData = {
+                    title:questionsTitle,
                     course_name: questionsTheme,
                     exam_data: questions,
                     teacher_name: localStorage.getItem('user_name'),
                     grade: '0',
                     tags: ['未提交', '未修改'],
-                    Date:new Date().toISOString().slice(0,10)
+                    Date: new Date().toISOString().slice(0, 10),
+                    totalGrade: questions.map((item) => parseInt(item.questionGrade)).reduce((pre, value) => pre + value)
                 }
                 await addExamApi(reqData)
                 // 清空表单数据
@@ -210,6 +217,14 @@ const JobPosting = () => {
                                     {item.course_name}
                                 </Select.Option>)}
                             </Select>
+                        </Form.Item>
+                    </Form.Item>
+                    <Form.Item label={`考试题目`}>
+                        <Form.Item
+                            name={`title`}
+                            rules={[{ required: true, message: '请输入此次考试题目' }]}
+                        >
+                            <Input placeholder={courseList[0].course_name} onChange={(e) => mainTitleChange(e.target.value)} />
                         </Form.Item>
                     </Form.Item>
                 </Form>

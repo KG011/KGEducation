@@ -10,6 +10,7 @@ const Course: React.FC = () => {
     const Navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const courseName = searchParams.get('course_name');
+    const courseId = searchParams.get('course_id');
 
     const [detailLabel, setDetailLabel] = useState('')
     return (
@@ -17,7 +18,7 @@ const Course: React.FC = () => {
             <div className="container-head">
                 <span className="container-head-back" onClick={() => Navigate(-1)}><RollbackOutlined /> 返回课程</span>
                 <span>{courseName}</span>
-                <span className="container-head-go" onClick={() => setRouter(`home/courseMembers?course_name=${courseName}`)}>课程管理</span>
+                <span className="container-head-go" onClick={() => setRouter(`home/courseMembers?course_name=${courseName}&course_id=${courseId}`)}>课程管理</span>
             </div>
             <div className="container course-container">
                 <CourseMenu setDetailLabel={setDetailLabel}></CourseMenu>

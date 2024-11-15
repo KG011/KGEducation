@@ -278,7 +278,7 @@ const GradeDetail = () => {
     }
     const { data } = await getExamGradeApi(dataQuery)
     setStudentList(JSON.parse(data.exam_grade[0].student_list))
-    setGradeList(JSON.parse(data.exam_grade[0].grade_list))
+    setGradeList(JSON.parse(data.exam_grade[0].grade_list).sort((a: number,b: number)=>b-a))
     setTotalGrade(data.exam_grade[0].totalGrade)
   }
   React.useEffect(() => {

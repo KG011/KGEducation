@@ -48,6 +48,7 @@ const AntvX6 = () => {
             stroke: '#8f8f8f',
             strokeWidth: 1,
         },
+
     }
     /**
      * 存储一些公用的数据
@@ -113,6 +114,7 @@ const AntvX6 = () => {
             imgUrl,
             notebook_type
         }
+        console.log(data);
         const res = await addNotebookApi(data)
         if (res.status == 200) {
             messageApi.open({
@@ -193,7 +195,7 @@ const AntvX6 = () => {
             label: '元素',
             attrs: commonAttrs,
             data: {
-                label: '元素',
+                name: '元素',
                 labelColor: '#000',
                 bgColor: '#FFFFFF',
                 borderColor: '#8F979D'
@@ -209,7 +211,7 @@ const AntvX6 = () => {
             label: '圆',
             attrs: commonAttrs,
             data: {
-                label: '圆',
+                name: '圆',
                 labelColor: '#000',
                 bgColor: '#FFFFFF',
                 borderColor: '#8F979D'
@@ -253,16 +255,16 @@ const AntvX6 = () => {
             path: 'M24.85,10.126c2.018-4.783,6.628-8.125,11.99-8.125c7.223,0,12.425,6.179,13.079,13.543c0,0,0.353,1.828-0.424,5.119c-1.058,4.482-3.545,8.464-6.898,11.503L24.85,48L7.402,32.165c-3.353-3.038-5.84-7.021-6.898-11.503c-0.777-3.291-0.424-5.119-0.424-5.119C0.734,8.179,5.936,2,13.159,2C18.522,2,22.832,5.343,24.85,10.126z',
             attrs: {
                 body: {
-                    fill: 'red',
+                    fill: '#FFFFFF',
                     stroke: '#8f8f8f',
                     strokeWidth: 1,
                 },
             },
             label: '爱心',
             data: {
-                label: '爱心',
+                name: '爱心',
                 labelColor: '#000',
-                bgColor: 'red',
+                bgColor: '#FFFFFF',
                 borderColor: '#8F979D'
             }
 
@@ -285,8 +287,33 @@ const AntvX6 = () => {
 
 
         });
-        stencil.load([n1, n2, n5], 'group1');
-        stencil.load([n3, n4], 'group2');
+        const n6 = x6Graph.createNode({
+            shape: 'polygonNew',
+            x: 60, // 节点在x轴的位置，可根据实际布局需求调整
+            y: 150, // 节点在y轴的位置，可根据实际布局需求调整
+            width: 50, // 可以用来辅助确定图形大小等，不同库作用稍有差异
+            height: 50, // 可以用来辅助确定图形大小等，不同库作用稍有差异
+            // 以下是定义菱形四个顶点的坐标，这里示例的坐标可以绘制出一个大致合适的菱形，
+            // 你可以根据实际要显示的位置、大小等进一步调整这些坐标值
+            points: '50,130 70,170 90,130 70,90',
+            label: '流程',
+            attrs: maxAttrs,
+            ports: {
+                items: [
+                    {
+                        id: 'port_1',
+                        group: 'top',
+                    },
+                    {
+                        id: 'port_4',
+                        group: 'bottom',
+                    },
+                ],
+            }
+
+        })
+        stencil.load([n1, n2, n5, n4], 'group1');
+        stencil.load([n3, n6], 'group2');
     }
     //初始化X6
     const { x6Graph } = useAntvX6({ container: containerRef, connectorType, x6Data: x6DataRef.current })
@@ -334,7 +361,9 @@ const AntvX6 = () => {
                     x6Data={x6DataRef.current}
                     x6Graph={x6Graph}
                     notebook_type={notebook_type}
-
+                    setLabelValue={setLabelValue}
+                    setLabelColor={setLabelColor}
+                    setBgColor={setBgColor}
                 >
                 </OptionDialog>
             </div></>

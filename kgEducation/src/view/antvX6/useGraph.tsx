@@ -9,12 +9,80 @@ import { Export } from '@antv/x6-plugin-export';
 import { History } from '@antv/x6-plugin-history';
 import { register } from '@antv/x6-react-shape'
 import MindMapNode, { MindMapNodeItem } from './mindMapNode';
-import {  CUSTOM_SHAPE, CUSTOM_SHAPE_HEIGHT, CUSTOM_SHAPE_HEIGHT_ITEM, CUSTOM_SHAPE_ITEM, CUSTOM_SHAPE_WIDTH, CUSTOM_SHAPE_WIDTH_ITEM } from './config';
+import { CUSTOM_SHAPE, CUSTOM_SHAPE_HEIGHT, CUSTOM_SHAPE_HEIGHT_ITEM, CUSTOM_SHAPE_ITEM, CUSTOM_SHAPE_WIDTH, CUSTOM_SHAPE_WIDTH_ITEM } from './config';
 // 定义useAntvX6 Hook接收一个包含容器引用的配置对象
 const useAntvX6 = (config: any) => {
     const { container, connectorType, x6Data } = config;
     const [x6Graph, setX6Graph] = useState<Graph>();
     //基础画布
+    Graph.registerNode(
+        'polygonNew',
+        {
+            inherit: 'polygon',
+            ports: {
+                groups: {
+                    top: {
+                        position: 'top',
+                        attrs: {
+                            circle: {
+                                magnet: true,
+                                stroke: '#8f8f8f',
+                                r: 6, // 增加连接桩半径
+                                style: {
+                                    visibility: 'hidden'
+                                } // 默认隐藏
+                            },
+                        },
+                    },
+                    bottom: {
+                        position: 'bottom',
+                        attrs: {
+                            circle: {
+                                magnet: true,
+                                stroke: '#8f8f8f',
+                                r: 6,
+                                style: {
+                                    visibility: 'hidden'
+                                } // 默认隐藏
+                            },
+                        },
+                    },
+                    left: {
+                        position: 'left',
+                        attrs: {
+                            circle: {
+                                magnet: true,
+                                stroke: '#8f8f8f',
+                                r: 6,
+                                style: {
+                                    visibility: 'hidden'
+                                } // 默认隐藏
+                            },
+                        },
+                    },
+                    right: {
+                        position: 'right',
+                        attrs: {
+                            circle: {
+                                magnet: true,
+                                stroke: '#8f8f8f',
+                                r: 6,
+                                style: {
+                                    visibility: 'hidden'
+                                } // 默认隐藏
+                            },
+                        },
+                    },
+                },
+            },
+            data: {
+                name: '流程',
+                labelColor: '#000',
+                bgColor: '#6BC1FF',
+                borderColor: '#8F979D'
+            }
+        },true
+    )
     Graph.registerNode(
         'custom-node',
         {
@@ -43,14 +111,6 @@ const useAntvX6 = (config: any) => {
                     rx: 8, // 增加圆角半径
                     ry: 8,
                 },
-                // img: {
-                //     'xlink:href':
-                //         'https://gw.alipayobjects.com/zos/antfincdn/FLrTNDvlna/antv.png',
-                //     width: 12, // 增加图标大小
-                //     height: 12,
-                //     x: 15,
-                //     y: 15,
-                // },
             },
             ports: {
                 groups: {
@@ -108,11 +168,11 @@ const useAntvX6 = (config: any) => {
                     },
                 },
             },
-            data:{
-                label:'导航',
-                labelColor:'#000',
-                bgColor:'#6BC1FF',
-                borderColor:'#8F979D'
+            data: {
+                name: '导航',
+                labelColor: '#000',
+                bgColor: '#6BC1FF',
+                borderColor: '#8F979D'
             }
         },
         true
@@ -124,14 +184,14 @@ const useAntvX6 = (config: any) => {
         width: CUSTOM_SHAPE_WIDTH,
         height: CUSTOM_SHAPE_HEIGHT,
         component: ({ node, graph }) => {
-            return <MindMapNode graph={graph} node={node} x6Data={x6Data}/> as any
+            return <MindMapNode graph={graph} node={node} x6Data={x6Data} /> as any
         },
-        data:{
-            label:'默认主题',
-            labelColor:'#000000',
-            bgColor:'#EFF4FF',
-            borderColor:'#5f95ff',
-            fontSize:'14px'
+        data: {
+            name: '默认主题',
+            labelColor: '#000000',
+            bgColor: '#EFF4FF',
+            borderColor: '#5f95ff',
+            fontSize: '14px'
         }
     })
 
@@ -141,14 +201,14 @@ const useAntvX6 = (config: any) => {
         width: CUSTOM_SHAPE_WIDTH_ITEM,
         height: CUSTOM_SHAPE_HEIGHT_ITEM,
         component: ({ node, graph }) => {
-            return <MindMapNodeItem graph={graph} node={node} x6Data={x6Data}/> as any
+            return <MindMapNodeItem graph={graph} node={node} x6Data={x6Data} /> as any
         },
-        data:{
-            label:'默认子标签',
-            labelColor:'#000000',
-            bgColor:'#FFFFFF',
-            borderColor:'#FF4D4F',
-            fontSize:'12px'
+        data: {
+            name: '默认子标签',
+            labelColor: '#000000',
+            bgColor: '#FFFFFF',
+            borderColor: '#FF4D4F',
+            fontSize: '12px'
         }
     })
 

@@ -144,6 +144,7 @@ const Exam: React.FC<Exam> = (props) => {
             totalGrade,
             tags: ['已提交', '未修改']
         }
+        console.log(dataQuery);
         const { data } = await submitExamApi(dataQuery)
         if (data.status == 200) {
             message.success(data.msg)

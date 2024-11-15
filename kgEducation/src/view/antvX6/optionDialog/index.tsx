@@ -10,10 +10,13 @@ interface OptionDialogProps {
     notebook_type?: any
     x6Data?: any
     x6Graph?: Graph
+    setLabelValue?:(str:string)=>void
+    setLabelColor?:(str:string)=>void
+    setBgColor?:(str:string)=>void
 }
 
 const OptionDialog: React.FC<OptionDialogProps> = (props) => {
-    const { x6Data, x6Graph, handleButtonClick, notebook_type } = props;
+    const { x6Data, x6Graph, handleButtonClick, notebook_type,setLabelValue,setLabelColor,setBgColor } = props;
     // 当前编辑的节点
     const [node, setNode] = useState<any>(null);
     const [isShowOptionDialog, setIsShowOptionDialog] = useState(false);
@@ -27,8 +30,10 @@ const OptionDialog: React.FC<OptionDialogProps> = (props) => {
             // 更新x6Data.nodeFormDataMap中的数据
             x6Data.nodeFormDataMap[node.id] = { ...x6Data.nodeFormDataMap[node.id], ...values };
             // 更新x6Data.nodeOperateMap中的数据
-            x6Data.nodeOperateMap[node.id].setNodeData({ ...x6Data.nodeFormDataMap[node.id], ...values });
-
+            if(x6Data?.nodeOperateMap[node.id]?.setNodeData){
+                x6Data.nodeOperateMap[node.id].setNodeData({ ...x6Data.nodeFormDataMap[node.id], ...values });
+            }
+            node.data={...node.data,...x6Data.nodeFormDataMap[node.id], ...values}
             // 更新formData状态为最新提交的值
             setFormData(values);
 
@@ -47,7 +52,7 @@ const OptionDialog: React.FC<OptionDialogProps> = (props) => {
         const handleNodeDoubleClick = (args: { node: any; }) => {
             const { node } = args;
             setNode(node);
-            console.log(node);
+            console.log(node,123);
             
             // 当前节点数据发生变化
             if (x6Data.nodeFormDataMap[node.id] !== formData) {
@@ -85,14 +90,14 @@ const OptionDialog: React.FC<OptionDialogProps> = (props) => {
                     style={{ maxWidth: 600 }}
                     initialValues={formData}
                 >
-                    <Form.Item label="文本值" name='label'>
-                        <Input />
+                    <Form.Item label="文本值" name='name'>
+                        <Input onChange={(e)=>setLabelValue?.(e.target.value)}/>
                     </Form.Item>
                     <Form.Item label="文本颜色" name='labelColor'>
-                        <Input type='color' />
+                        <Input type='color'  onChange={(e)=>setLabelColor?.(e.target.value)}/>
                     </Form.Item>
                     <Form.Item label="背景颜色" name='bgColor'>
-                        <Input type='color' />
+                        <Input type='color' onChange={(e)=>setBgColor?.(e.target.value)}/>
                     </Form.Item>
                     <Form.Item label="边框颜色" name='borderColor'>
                         <Input type='color' />

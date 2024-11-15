@@ -12,11 +12,12 @@ interface ModalComponent {
     submitExam?: () => void
     submitEdit?: () => void
     goBack?: () => void
-    sumbitGrade?:()=>void
+    sumbitGrade?: () => void
+    onInviteStu?: () => void
     modalType?: string
 }
 const ModalComponent: React.FC<ModalComponent> = (
-    { title, setIsNewCourse, modalType, submitEdit,sumbitGrade, submitExam,setIsShowExam, setGetNewList, notFooter, children }) => {
+    { title, setIsNewCourse, modalType, onInviteStu, submitEdit, sumbitGrade, submitExam, setIsShowExam, setGetNewList, notFooter, children }) => {
     const { openModel, setOpenModel, setRouter } = useGlobalContext()
     const [loading, setLoading] = useState(false);
     const handleOk = () => {
@@ -24,7 +25,7 @@ const ModalComponent: React.FC<ModalComponent> = (
         switch (modalType) {
             case '退出':
                 setOpenModel(false);
-                if(setIsShowExam){
+                if (setIsShowExam) {
                     setIsShowExam?.(false)
                     return
                 }
@@ -49,6 +50,10 @@ const ModalComponent: React.FC<ModalComponent> = (
                 sumbitGrade?.()
                 setLoading(false);
                 setRouter(-1)
+                break
+            case '邀请学员':
+                onInviteStu?.()
+                setOpenModel(false);
                 break
         }
         setTimeout(() => {

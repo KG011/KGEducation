@@ -167,7 +167,7 @@ const MindMapNode = (props: MindMapNodeProps) => {
                     borderColor: x6Data?.nodeFormDataMap?.[node.id]?.borderColor || nodeData.borderColor,
                 }}>
                 <div className="mind-map-node-title">
-                    {x6Data?.nodeFormDataMap?.[node.id]?.label || nodeData.label}
+                    {x6Data?.nodeFormDataMap?.[node.id]?.name || nodeData.name}
                 </div>
                 {NODE_TOOLS.map(({ placement }) => {
                     return (
@@ -214,7 +214,7 @@ export const MindMapNodeItem = (props: MindMapNodeItemProps) => {
                 borderColor: x6Data?.nodeFormDataMap?.[node.id]?.borderColor || nodeData.borderColor,
             }}>
             <div className='true-node-item-title'>
-                {x6Data?.nodeFormDataMap?.[node.id]?.label || nodeData.label}
+                {x6Data?.nodeFormDataMap?.[node.id]?.name || nodeData.name}
             </div>
         </div>
     )

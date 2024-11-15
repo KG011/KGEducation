@@ -73,8 +73,10 @@ const Backlog: React.FC = () => {
                                         <img src={courseImage} alt="" />
                                     </div>
                                     <div className="exam-list-item-meta-content">
-                                        <div className="exam-list-item-meta-content-title">考试：{item.course_name}</div>
-                                        <div className="exam-list-item-meta-content-user">发布人：{item.teacher_name}</div>
+                                        <div className="exam-list-item-meta-content-title">{item.title}</div>
+                                        <div className="exam-list-item-meta-content-user">发布人：{item.teacher_name} </div>
+                                        <div className="exam-list-item-meta-content-user">课程：{item.course_name}</div>
+                                        <div className="exam-list-item-meta-content-user">日期：{item.Date}</div>
                                     </div>
                                 </div>
                                 <span

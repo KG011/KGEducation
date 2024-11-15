@@ -25,6 +25,9 @@ router.post("/sumbitGradeApi", controllers.sumbitGradeApi);
 router.get("/getGradeListapi", controllers.getGradeListapi);
 router.post("/getExamGradeApi", controllers.getExamGradeApi);
 router.post("/checkIsHaveExamApi", controllers.checkIsHaveExamApi);
+router.post("/getCourseMemberApi", controllers.getCourseMemberApi);
+router.get("/getStudentListApi", controllers.getStudentListApi);
+router.post("/onInviteStuApi", controllers.onInviteStuApi);
 
 // 导出router
 module.exports = router;

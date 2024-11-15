@@ -108,7 +108,7 @@ const initMindMapX6 = (props: InitX6) => {
         x: 280,
         y: 200,
         data:{
-            label:'默认主题'
+            name:'默认主题'
         }
     })
     // 监听鼠标悬浮事件
