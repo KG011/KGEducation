@@ -142,7 +142,7 @@ app.use((err, req, res, next) => {
     return res.send({ status: 401, msg: "无效的token！" });
   // 其它错误
   res.send({
-    status: 500,
+    status: 401,
     msg: err.message+'请重新登录',
   });
 });
