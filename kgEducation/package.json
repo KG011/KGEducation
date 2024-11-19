@@ -30,7 +30,9 @@
     "react-dom": "^18.3.1",
     "react-error-boundary": "^4.0.13",
     "react-router-dom": "^6.27.0",
-    "scss": "^0.2.4"
+    "scss": "^0.2.4",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",

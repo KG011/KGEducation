@@ -1,0 +1,16 @@
+.newFriend-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    .newFriend-content{
+        width: 100%;
+        flex: 1;
+        padding-right: 10px;
+        overflow-y: auto;
+        .inputArea{
+            display: flex;
+            align-items: center;
+           
+        }
+    }
+}

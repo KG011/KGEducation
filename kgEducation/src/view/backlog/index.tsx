@@ -1,23 +1,10 @@
 import React from 'react';
-import { Avatar, List, message } from 'antd';
+import {  message } from 'antd';
 import './index.scss'
 import courseImage from '@/assets/course1.png'
 import { checkIsHaveExamApi, getBacklogExamApi } from '@/config/apis/modules/course';
 import Exam from './exam';
-const data = [
-    {
-        title: 'Ant Design Title 1',
-    },
-    {
-        title: 'Ant Design Title 2',
-    },
-    {
-        title: 'Ant Design Title 3',
-    },
-    {
-        title: 'Ant Design Title 4',
-    },
-];
+
 interface examData {
     [name: string]: string
 }
@@ -88,19 +75,7 @@ const Backlog: React.FC = () => {
                         )
                     }) : <div>no</div>}
                 </ul>
-                <List
-                    itemLayout="horizontal"
-                    dataSource={data}
-                    renderItem={(item, index) => (
-                        <List.Item>
-                            <List.Item.Meta
-                                avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
-                                title={<a href="https://ant.design">{item.title}</a>}
-                                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            />
-                        </List.Item>
-                    )}
-                />
+               
             </div>
             {isShowExam && <Exam examData={nowExam} title={title} examInfo={examInfo} setIsShowExam={setIsShowExam}/>}
         </>

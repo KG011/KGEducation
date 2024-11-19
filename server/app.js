@@ -114,14 +114,22 @@ io.on('connection', (socket) => {
   });
   // 私聊发送消息
   socket.on('send', ({ fromUsername, targetId, msg }) => {
+    console.log(21);
+    
     const targetSocket = io.sockets.sockets.get(targetId)
     const toUser = userList.find(user => user.id == targetId)
     targetSocket.emit('receive', {
-      fromUsername,
-      toUsername: toUser.username,
-      msg,
-      time: new Date()
+      user1_id:toUser.id,
+      user2_id:targetId,
+      message:msg,
+      dateTime: new Date()
     })
+    // targetSocket.emit('receive', {
+    //   fromUsername,
+    //   toUsername: toUser.username,
+    //   msg,
+    //   time: new Date()
+    // })
   })
   // 群聊发送消息
   socket.on('chatMessage', ({ username, groupId, msg }) => {

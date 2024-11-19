@@ -5,12 +5,12 @@ import courseImage from '@/assets/course1.png';
 import smileImage from '@/assets/smile.svg';
 import pictureImage from '@/assets/picture.svg';
 import { EllipsisOutlined } from '@ant-design/icons';
-
 import { Popover } from "antd";
-import { useSearchParams } from "react-router-dom";
-import { appendMessageApi, getMessageListApi } from "@/config/apis/modules/friend";
+import {  useSearchParams } from "react-router-dom";
+import { appendGroupMessageApi, appendMessageApi, getGroupMessageApi, getMessageListApi } from "@/config/apis/modules/friend";
 import { formattedDate } from "@/utils/dateTime";
 import { useGlobalContext } from "@/context/Global";
+import useWebSocket from "./useWebSocket";
 
 interface MessageInfo {
     message: string;
@@ -30,14 +30,25 @@ const emojis = ['😀', '😎', '👍', '😄', '😍', '🤩', '😅', '🤣', 
 const UserList: React.FC = () => {
     const { setLastMessageTime, lastMessageTime } = useGlobalContext()
     const [searchParams] = useSearchParams();
-    const user2_name = searchParams.get('user_name');
-    const user2_id = searchParams.get('user_id');
+    //我的id
     const user1_id = Number(localStorage.getItem('id'))
+    //我的名字
+    const user1_name = searchParams.get('user_name');
+    //对方名字
+    const user2_name = searchParams.get('user_name');
+    //对方id
+    const user2_id = searchParams.get('user_id');
+    //聊天类型 私人1对1 聊天室
+    const chatType = searchParams.get('chatType');
     const [open, setOpen] = React.useState(false);
     const inputRef = React.useRef<HTMLTextAreaElement>(null);
     const messagesRef = React.useRef<HTMLDivElement>(null);
     const [messages, setMessages] = React.useState<Message[]>([]);
 
+
+    //开启webSocket连接
+    const { socket, onlineUserList } = useWebSocket(messages,setMessages)
+    
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen);
     };
@@ -78,28 +89,60 @@ const UserList: React.FC = () => {
                 setMessages([...messages, {
                     messageInfo: { ...dataQuery }
                 }]);
-                appendMessageApi(dataQuery)
+                if(chatType=='private'){
+                    sendMessagePrivate(inputValue,dataQuery)
+                }else{
+                    sendMessageGroup(inputValue,dataQuery)
+                }
                 if (inputRef.current) {
                     inputRef.current.value = "";
                 }
             }
         }
     };
+    //私聊发送
+    const sendMessagePrivate=(inputValue:string,dataQuery: object)=>{
+        const isLogin: any = onlineUserList.find((user: any) => {
+            return user.username == user2_name
+        })
+        //webSocket实时发送信息
+        if (isLogin != undefined) {
+            socket.emit('send', {
+                fromUsername: user1_name,
+                targetId: isLogin.id,
+                msg: inputValue,
+            })
+        }
+        appendMessageApi(dataQuery)
+    }
+    //群聊发送
+    const sendMessageGroup=(inputValue:string,dataQuery: object)=>{
+        console.log(inputValue);
+        appendGroupMessageApi(dataQuery)
+    }
 
     const initData = async () => {
-        const dataQuery = {
-            user1_id: Number(localStorage.getItem('id')),
-            user2_name
+        if (chatType == 'private') {
+            const dataQuery = {
+                user1_id: Number(localStorage.getItem('id')),
+                user2_id
+            }
+            const { data } = await getMessageListApi(dataQuery)
+            setMessages(data.integratedResults);
+        }else{
+            const dataQuery = {
+                group_id:user2_id
+            }
+            const { data } = await getGroupMessageApi(dataQuery)
+            setMessages(data.integratedResults);
         }
-        const { data } = await getMessageListApi(dataQuery)
-        setMessages(data.integratedResults);
-
-
     }
+    
+
     React.useEffect(() => {
         initData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user2_id]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user2_id,user2_name]);
     React.useEffect(() => {
         if (messagesRef.current) {
             const { scrollHeight, clientHeight } = messagesRef.current;
@@ -174,3 +217,4 @@ const UserList: React.FC = () => {
 };
 
 export default UserList;
+
