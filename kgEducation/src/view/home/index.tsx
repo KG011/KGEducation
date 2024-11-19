@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { EditOutlined, FileSearchOutlined, HomeOutlined, LineChartOutlined, ReadOutlined, SnippetsOutlined, UserOutlined } from '@ant-design/icons';
+import { EditOutlined, FileSearchOutlined, HomeOutlined, LineChartOutlined, ReadOutlined, SnippetsOutlined, SolutionOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
 import KGHeader from '@/components/KGHeader'
@@ -25,7 +26,7 @@ const Home: React.FC = () => {
             label: '待办',
             icon: <ReadOutlined />,
             children: [
-                { key: '/home/backlog', label: '学员考试', icon: <EditOutlined />, disabled: localStorage.getItem('role') === 'teacher'?true:false },
+                { key: '/home/backlog', label: '学员考试', icon: <EditOutlined />, disabled: localStorage.getItem('role') === 'teacher' ? true : false },
                 {
                     key: '考试操作',
                     label: '考试操作', icon: <SnippetsOutlined />,
@@ -56,16 +57,25 @@ const Home: React.FC = () => {
             type: 'divider',
         },
         {
-            key: '联系人',
-            label: '联系人',
-            icon: <UserOutlined />,
+            key: '通讯录',
+            label: '通讯录',
+            icon: <SolutionOutlined />,
             children: [
-                { key: '12', label: '张三' },
-                { key: '13', label: '李逵' },
-                { key: '14', label: '宋江' },
-                { key: '15', label: '智多星' },
+                { key: '新的朋友', label: '新的朋友' ,icon:<UserAddOutlined />},
+                {
+                    key: '联系人',
+                    label: '联系人',
+                    icon: <UserOutlined />,
+                    children: [
+                        { key: '12', label: '张三' },
+                        { key: '13', label: '李逵' },
+                        { key: '14', label: '宋江' },
+                        { key: '15', label: '智多星' },
+                    ],
+                },
             ],
         },
+
         {
             key: '群聊',
             label: '所在群聊',
@@ -82,23 +92,39 @@ const Home: React.FC = () => {
     useEffect(() => {
         const menuListData = async () => {
             try {
-                const response = await getFriendListApi({ userId: 0 });
+                const response = await getFriendListApi({ userId: Number(localStorage.getItem('id')) });
                 if (response && response.data.status === 500 && response.data.msg && response.data.msg.includes("No authorization token was found")) {
                     setRouter('/login'); // 跳转到登录页
                 }
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const contactsData = response.data.friendList?.map((contact: any) => ({
-                    key: contact.friendName.toString() + 'friend', // 根据实际数据中的唯一标识字段
+                    key: contact.friendName.toString() + '-' + contact.user2_id.toString() + '-friend', // 根据实际数据中的唯一标识字段
                     label: contact.friendName,
                 }));
                 // 更新联系人部分的数据
                 setMenuList((prevItems) => {
-                    return prevItems.map((item) =>
-                        item?.key === '联系人' ? { ...item, children: contactsData } : item
+                    return prevItems.map((item:any) => {
+                        if (item?.key == '通讯录') {
+                            return {
+                                ...item,
+                                children: item.children.map((subItem: { key: string; }) => {
+                                    if (subItem.key === '联系人') {
+                                        return {
+                                            ...subItem,
+                                            children: contactsData
+                                        };
+                                    }
+                                    return subItem;
+                                })
+                            };
+                        }
+                        return item
+                        // return item?.key === '联系人' ? { ...item, children: contactsData } : item
+                    }
+
                     );
                 });
             } catch (error) {
-                
+
                 console.error('Error fetching menu data:', error);
             }
         };
@@ -114,7 +140,8 @@ const Home: React.FC = () => {
     }, [location])
     const onClick: MenuProps['onClick'] = (e) => {
         if (e.key.includes('friend')) {
-            setRouter('/home/userList')
+            const userParm = e.key.split('-')
+            setRouter(`/home/userList?user_name=${userParm[0]}&user_id=${userParm[1]}`)
             return
         }
         switch (e.key) {

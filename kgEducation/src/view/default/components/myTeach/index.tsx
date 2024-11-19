@@ -23,7 +23,7 @@ const MyTeach: React.FC<MyTeachProps> = (props) => {
     const fetchData = useCallback(async () => {
         try {
             const response = await getTeacherCourse({ userId: Number(localStorage.getItem('id')), role: 'teacher' });
-            if (response && response.data.status === 500 && response.data.msg && response.data.msg.includes("jwt expired请重新登录")) {
+            if (response && response.data.status === 401 && response.data.msg && response.data.msg.includes("jwt expired请重新登录")) {
                 setRouter('/login'); // 跳转到登录页
                 return
             }

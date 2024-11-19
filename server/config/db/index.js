@@ -7,6 +7,7 @@ const db = mysql.createPool({
   user: "root",
   password: "123456",
   database: "kgeducation",
+  charset: 'utf8mb4'
 });
 
 // 向外共享 db 数据库连接对象

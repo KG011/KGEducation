@@ -9,9 +9,12 @@ interface GlobalProps {
   userInfo: number;
   openModel: boolean
   isPhotoShow:boolean
+  lastMessageTime:Date | undefined
   setIsPhotoShow:(bol: boolean) => void;
   type:string
   setType:(str: string) => void
+  setLastMessageTime:(date: Date) => void
+  
 }
 interface GlobalProviderProps {
   // 子组件
@@ -28,6 +31,10 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [type, setType] = React.useState('');
   //图片墙
   const [isPhotoShow, setIsPhotoShow] = React.useState(false)
+
+  //上一次发送消息的时间戳
+  const [lastMessageTime, setLastMessageTime] = React.useState<Date>();
+
   //路由跳转
   const Navigate = useNavigate();
   const routerFunction = (router: string|number) => {
@@ -44,7 +51,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       isPhotoShow,
       setIsPhotoShow,
       type, 
-      setType
+      setType,
+      setLastMessageTime,
+      lastMessageTime
     }}>
       {children}
     </GlobalContext.Provider>
