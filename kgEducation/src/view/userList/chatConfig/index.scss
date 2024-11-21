@@ -1,0 +1,22 @@
+.chat-config-container{
+    width: 100%;
+    padding: 10px;
+    .chat-config-list{
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        padding: 10px 0;
+        border-bottom: 1px solid #C8C6C5;
+        .chat-list-item{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .chat-list-item:last-child(){
+            margin-right: 0;
+        }
+    }
+}

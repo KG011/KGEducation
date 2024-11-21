@@ -98,8 +98,6 @@ const Home: React.FC = () => {
                 if (response && response.status === 500 && response.data.msg && response.data.msg.includes("No authorization token was found")) {
                     setRouter('/login'); // 跳转到登录页
                 }
-                console.log(response.data.friendList,23);
-                
                 const contactsData = response.data.friendList?.map((contact: any) => ({
                     key: contact.friendName.toString() + '-' + contact.friend_id.toString() + '-friend', // 根据实际数据中的唯一标识字段
                     label: contact.friendName,

@@ -43,6 +43,13 @@ export const getGroupMessageApi = (data: object) => {
     return fetch.post('/friend/getGroupMessageApi',data)
 }
 
+//获取群聊用户列表
+export const getGroupUserListApi = (data: object) => {
+    return fetch.post('/friend/getGroupUserListApi',data)
+}
+
+
+
 
 
 

@@ -271,6 +271,60 @@ exports.getRequestApi = (req, res) => {
     });
 };
 
+//获取群聊用户列表
+exports.getGroupUserListApi = (req, res) => {
+    const { group_id, type } = req.body;
+    if (type === 'group') {
+        // 先从grouplist表中根据group_id获取user_id集合
+        const selectUserIdsSql = `SELECT user_id FROM grouplist WHERE group_id =?`;
+        db.query(selectUserIdsSql, [group_id], (err, userIdsResults) => {
+            if (err) {
+                return res.send({ status: 500, msg: err.message });
+            }
+            // 存储最终结果的数组
+            let finalResults = [];
+            // 如果找到了user_id集合
+            if (userIdsResults.length > 0) {
+                // 提取user_id数组
+                let userIds = userIdsResults.map(result => result.user_id);
+                // 根据每个user_id去users表中查找信息
+                const selectUserInfoSql = `SELECT real_name, id FROM users WHERE id IN (?)`;
+                db.query(selectUserInfoSql, [userIds], (err, userInfoResults) => {
+                    if (err) {
+                        return res.send({ status: 500, msg: err.message });
+                    }
+                    finalResults = userInfoResults;
+                    res.send({
+                        status: 200,
+                        msg: "成功",
+                        userList: finalResults
+                    });
+                });
+            } else {
+                res.send({
+                    status: 200,
+                    msg: "群中无用户",
+                    userList: finalResults
+                });
+            }
+        });
+    } else {
+        // 根据group_id直接去users表找对应信息
+        const selectUserInfoSql = `SELECT real_name, id FROM users WHERE id =?`;
+        db.query(selectUserInfoSql, [group_id], (err, userInfoResults) => {
+            if (err) {
+                return res.send({ status: 500, msg: err.message });
+            }
+            res.send({
+                status: 200,
+                msg: "成功",
+                userList: userInfoResults
+            });
+        });
+    }
+};
+
+
 
 
 exports.deleteRequest = (req, res) => {

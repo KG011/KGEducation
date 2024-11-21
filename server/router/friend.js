@@ -13,6 +13,7 @@ router.post("/appendGroupMessageApi", controllers.appendGroupMessageApi);
 router.get("/getAllUserApi", controllers.getAllUserApi);
 router.post("/sendRequsetApi", controllers.sendRequsetApi);
 router.post("/getRequestApi", controllers.getRequestApi);
+router.post("/getGroupUserListApi", controllers.getGroupUserListApi);
 
 
 

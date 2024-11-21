@@ -5,12 +5,13 @@ import courseImage from '@/assets/course1.png';
 import smileImage from '@/assets/smile.svg';
 import pictureImage from '@/assets/picture.svg';
 import { EllipsisOutlined } from '@ant-design/icons';
-import { Popover } from "antd";
-import {  useSearchParams } from "react-router-dom";
+import { Drawer, Popover, theme } from "antd";
+import { useSearchParams } from "react-router-dom";
 import { appendGroupMessageApi, appendMessageApi, getGroupMessageApi, getMessageListApi } from "@/config/apis/modules/friend";
 import { formattedDate } from "@/utils/dateTime";
 import { useGlobalContext } from "@/context/Global";
 import useWebSocket from "./useWebSocket";
+import ChatConfig from "./chatConfig";
 
 interface MessageInfo {
     message: string;
@@ -47,8 +48,8 @@ const UserList: React.FC = () => {
 
 
     //开启webSocket连接
-    const { socket, onlineUserList } = useWebSocket(messages,setMessages)
-    
+    const { socket, onlineUserList } = useWebSocket(messages, setMessages)
+
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen);
     };
@@ -89,10 +90,10 @@ const UserList: React.FC = () => {
                 setMessages([...messages, {
                     messageInfo: { ...dataQuery }
                 }]);
-                if(chatType=='private'){
-                    sendMessagePrivate(inputValue,dataQuery)
-                }else{
-                    sendMessageGroup(inputValue,dataQuery)
+                if (chatType == 'private') {
+                    sendMessagePrivate(inputValue, dataQuery)
+                } else {
+                    sendMessageGroup(inputValue, dataQuery)
                 }
                 if (inputRef.current) {
                     inputRef.current.value = "";
@@ -101,7 +102,7 @@ const UserList: React.FC = () => {
         }
     };
     //私聊发送
-    const sendMessagePrivate=(inputValue:string,dataQuery: object)=>{
+    const sendMessagePrivate = (inputValue: string, dataQuery: object) => {
         const isLogin: any = onlineUserList.find((user: any) => {
             return user.username == user2_name
         })
@@ -116,7 +117,7 @@ const UserList: React.FC = () => {
         appendMessageApi(dataQuery)
     }
     //群聊发送
-    const sendMessageGroup=(inputValue:string,dataQuery: object)=>{
+    const sendMessageGroup = (inputValue: string, dataQuery: object) => {
         console.log(inputValue);
         appendGroupMessageApi(dataQuery)
     }
@@ -129,20 +130,29 @@ const UserList: React.FC = () => {
             }
             const { data } = await getMessageListApi(dataQuery)
             setMessages(data.integratedResults);
-        }else{
+        } else {
             const dataQuery = {
-                group_id:user2_id
+                group_id: user2_id
             }
             const { data } = await getGroupMessageApi(dataQuery)
             setMessages(data.integratedResults);
         }
     }
-    
+    //局部抽屉
+    const { token } = theme.useToken();
+    const [openDrawer, setOpenDrawer] = React.useState(false);
+  
+    const showDrawer = () => {
+        setOpenDrawer(true);
+      };
+    const onClose = () => {
+        setOpenDrawer(false);
+    };
 
     React.useEffect(() => {
         initData()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user2_id,user2_name]);
+    }, [user2_id, user2_name]);
     React.useEffect(() => {
         if (messagesRef.current) {
             const { scrollHeight, clientHeight } = messagesRef.current;
@@ -153,10 +163,17 @@ const UserList: React.FC = () => {
             });
         }
     }, [messages]);
+    const containerStyle: React.CSSProperties = {
+        position: 'relative',
+        border: `1px solid ${token.colorBorderSecondary}`,
+        borderRadius: token.borderRadiusLG,
+      };
 
     return (
-        <div className="chatting-container">
-            <div className="content-header"><span>{user2_name}</span><span><EllipsisOutlined /></span></div>
+        <div className="chatting-container" style={containerStyle}>
+            <div className="content-header">
+                <span>{user2_name}</span>
+                <span onClick={()=>showDrawer()}><EllipsisOutlined /></span></div>
             <div className="content-box" ref={messagesRef}>
                 {messages?.map((item, index) => {
                     const isOwnMessage = item.messageInfo.user1_id === user1_id;
@@ -212,6 +229,17 @@ const UserList: React.FC = () => {
                 </div>
                 <div className="inputArea-box-footer">按 Enter 发送消息</div>
             </div>
+            <Drawer
+                title={user2_name}
+                placement="right"
+                closable={false}
+                onClose={onClose}
+                open={openDrawer}
+                getContainer={false}
+                style={{background:'#F5F5F5'}}
+            >
+                <ChatConfig type={chatType!} group_id={user2_id!}></ChatConfig>
+            </Drawer>
         </div>
     );
 };

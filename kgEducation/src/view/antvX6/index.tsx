@@ -305,6 +305,14 @@ const AntvX6 = () => {
                         group: 'top',
                     },
                     {
+                        id: 'port_2',
+                        group: 'left',
+                    },
+                    {
+                        id: 'port_3',
+                        group: 'right',
+                    },
+                    {
                         id: 'port_4',
                         group: 'bottom',
                     },

@@ -7,15 +7,16 @@ interface MyStudyProps {
     jumpRouter: (path: string) => void
 }
 const MyStudy: React.FC<MyStudyProps> = (props) => {
-    const { userInfo } = useGlobalContext()
+    const { userInfo, setRouter } = useGlobalContext()
     const { jumpRouter } = props
     const [courseList, setCourseList] = React.useState(new Array(20).fill({ label: '2' }))
     React.useEffect(() => {
         const myCourseData = async () => {
             try {
                 const response = await getMyCourseApi({ userId: userInfo,role:'student' });
-                if (response.data.status == 500) {
-                    jumpRouter('/login')
+                if (response && response.data.status === 401 && response.data.msg && response.data.msg.includes("jwt expired请重新登录")) {
+                    setRouter('/login'); // 跳转到登录页
+                    return
                 }
                 //更新我的课程列表
                 setCourseList(response.data.courseList)
@@ -25,7 +26,7 @@ const MyStudy: React.FC<MyStudyProps> = (props) => {
             }
         };
         myCourseData();
-    }, [jumpRouter, userInfo])
+    }, [jumpRouter, setRouter, userInfo])
     return (
         <div className="education-cantainer">
             {courseList.map((item, index) => {
