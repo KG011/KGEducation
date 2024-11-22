@@ -25,6 +25,8 @@ router.post("/searchFriend",userHandler.searchFriend);
 
 router.post("/register",userHandler.register);
 
+router.post("/getPersonlApi",userHandler.getPersonlApi);
+
 
 // 导出router
 module.exports = router;

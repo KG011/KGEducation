@@ -19,6 +19,7 @@ import GradeDetail from '@/view/grade/gradeDetail';
 import NewFriend from '@/view/userList/newFriend';
 import RequestHandling from '@/view/userList/requestHandling';
 import Group from '@/view/userList/group';
+import Personal from '@/view/personal';
 // 通用路由渲染组件
 function RouterWrapper() {
   return (
@@ -45,6 +46,7 @@ function RouterWrapper() {
         <Route path="newFriend" element={<NewFriend />} />
         <Route path="requestHandling" element={<RequestHandling />} />
         <Route path="group" element={<Group />} />
+        <Route path="personal" element={<Personal />} />
         
       </Route>
     </Routes>

@@ -67,7 +67,8 @@ ORDER BY effectiveDateTime ASC;`;
 
         // 2. 如果有消息结果，遍历结果并根据 user2_id 从 users 表查找对应信息
         if (messageResults.length > 0) {
-            const userIdsToLookup = messageResults.map(result => result.user2_id);
+            console.log(messageResults);
+            const userIdsToLookup = messageResults.map(result => result.user1_id);
             const uniqueUserIds = [...new Set(userIdsToLookup)];
 
             const selectUsersSql = "SELECT * FROM users WHERE id IN (?);";
@@ -78,7 +79,7 @@ ORDER BY effectiveDateTime ASC;`;
 
                 // 3. 集成消息和用户信息并返回
                 const integratedResults = messageResults.map(message => {
-                    const correspondingUser = userResults.find(user => user.id === message.user2_id);
+                    const correspondingUser = userResults.find(user => user.id === message.user1_id);
                     return {
                         messageInfo: message,
                         userInfo: correspondingUser
@@ -157,6 +158,7 @@ ORDER BY effectiveDateTime ASC;`;
 //发送消息
 exports.appendMessageApi = (req, res) => {
     const data = req.body
+    const avatar = data.avatar || null;
     const insertSql = `INSERT INTO friend_message (user1_id, user2_id, message,dateTime,user2_name) VALUES (?,?,?,?,?)`;
     db.query(insertSql, [data.user1_id, data.user2_id, data.message, data.dateTime, data.user2_name], (err, results) => {
         // 执行 selectSql 语句失败
@@ -172,8 +174,6 @@ exports.appendMessageApi = (req, res) => {
 //发送消息
 exports.appendGroupMessageApi = (req, res) => {
     const data = req.body
-    console.log(data);
-
     const insertSql = `INSERT INTO group_message (user1_id, group_id, message,dateTime) VALUES (?,?,?,?)`;
     db.query(insertSql, [data.user1_id, data.user2_id, data.message, data.dateTime], (err, results) => {
         // 执行 selectSql 语句失败
@@ -326,8 +326,32 @@ exports.getGroupUserListApi = (req, res) => {
 
 
 
-
-exports.deleteRequest = (req, res) => {
+// app.post('/upload', upload.single('file'), (req, res) => {
+//     // req.file是multer解析上传文件后提供的对象，包含了文件的相关信息，比如文件名等
+//     const fileName = req.file.filename;
+//     const userId = req.body.userId; // 这里假设前端上传图片时会在请求体中携带用户ID信息，根据实际情况调整获取方式
+//     // 调用函数将图片文件名和用户ID信息插入到数据库中
+//     insertImageInfo(fileName, userId, (err, results) => {
+//       if (err) {
+//         res.status(500).send('图片上传失败，保存到数据库出错');
+//         return;
+//       }
+//       res.status(200).send('图片上传成功，已保存到数据库');
+//     });
+//     //  const sql = 'INSERT INTO images (file_name, user_id) VALUES (?,?)';
+//     //   connection.query(sql, [fileName, userId], (err, results) => {
+//     //       if (err) {
+//     //           console.error('插入图片信息到数据库失败：', err);
+//     //           callback(err);
+//     //           return;
+//     //       }
+//     //       callback(null, results);
+//     //   });
+//     // req.file 就是上传后的文件信息，这里简单返回文件名表示上传成功
+//     res.send({ status: 200, msg: '文件上传成功', fileName: req.file.filename });
+//   });
+exports.upload = (req, res) => {
+    
     const values = [req.body.username, req.body.friendname];
     const deleteSql = 'DELETE FROM friend_request WHERE username = ? AND friendname = ?'
     db.query(deleteSql, values, (err, results) => {

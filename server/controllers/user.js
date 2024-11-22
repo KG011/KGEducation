@@ -65,7 +65,6 @@ exports.register = (req, res) => {
     });
 };
 
-
 // 登录的处理函数
 exports.login = (req, res) => {
     // 接收客户端传递的表单数据
@@ -84,6 +83,8 @@ exports.login = (req, res) => {
         const token = jwt.sign({ username: req.body.username }, secretKey, {
             expiresIn: expiresIn,
         });
+        console.log(results[0]);
+        
         res.send({
             status: 200,
             msg: "登陆成功！",
@@ -92,9 +93,27 @@ exports.login = (req, res) => {
             role: results[0].role,
             userId:results[0].id,
             real_name:results[0].real_name,
+            avatar:results[0].avatar,
         });
 
     });
 };
+
+//获取个人中心信息
+exports.getPersonlApi=(req, res)=>{
+    const sql = "SELECT id,real_name,role,avatar FROM users WHERE id=?";
+    db.query(sql, req.body.user_id, (err, results) =>{
+        if (err) {
+            return res.send({ status: 500, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            personalInfo:results
+        });
+    })
+}
+
+
+
 
 

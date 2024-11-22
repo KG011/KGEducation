@@ -1,24 +1,30 @@
 import fetch from '@/config/fetch/index.ts';
 
-export const LoginApi = (data: User) =>{
+/**
+ * 登录
+ */
+export const LoginApi = (data: User) => {
   return fetch.post('/user/login', data)
 }
-export const RegisterApi = (data: User) =>{
-    return fetch.post('/user/register', data)
-  }
-export const userInfoApi = (data: User) =>{
-  return fetch.post('/user/userInfo', data)
+/**
+ * 注册
+ */
+export const RegisterApi = (data: User) => {
+  return fetch.post('/user/register', data)
 }
-export const searchFriendApi = (data:User) =>{
-  return fetch.post('/user/searchFriend', data)
-}
+// export const userInfoApi = (data: User) =>{
+//   return fetch.post('/user/userInfo', data)
+// }
+// export const searchFriendApi = (data:User) =>{
+//   return fetch.post('/user/searchFriend', data)
+// }
 
 /**
- * 更新用户名
+ * 获取个人中心信息
  */
-export const UpdateUN = (data: User) => {
-  return fetch.patch(`/user/username`, data);
-};
+export const getPersonlApi = (data: object) => {
+  return fetch.post('/user/getPersonlApi', data)
+}
 
 
 /**

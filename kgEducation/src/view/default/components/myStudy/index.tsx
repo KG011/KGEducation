@@ -14,10 +14,6 @@ const MyStudy: React.FC<MyStudyProps> = (props) => {
         const myCourseData = async () => {
             try {
                 const response = await getMyCourseApi({ userId: userInfo,role:'student' });
-                if (response && response.data.status === 401 && response.data.msg && response.data.msg.includes("jwt expired请重新登录")) {
-                    setRouter('/login'); // 跳转到登录页
-                    return
-                }
                 //更新我的课程列表
                 setCourseList(response.data.courseList)
             } catch (error) {

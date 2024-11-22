@@ -3,19 +3,31 @@ import './index.scss'
 import logoImg from '@/assets/base/logo.svg'
 import PersonalImg from '@/assets/base/personal.svg'
 import { Dropdown, MenuProps, Space } from "antd";
-import { DownOutlined, SmileOutlined } from '@ant-design/icons';
+import { DownOutlined, RightSquareOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons';
+import { useGlobalContext } from "@/context/Global";
 
 interface KGHeader {
     middleTitle?: string
     rightConfig?: () => JSX.Element
 }
 const KGHeader: React.FC<KGHeader> = (props) => {
+    const { setRouter } = useGlobalContext()
     const items: MenuProps['items'] = [
+        {
+            key: '3',
+            label: (
+                <span onClick={() =>
+                    setRouter(`/home/personal?id=${localStorage.getItem('id')}&user_name=${localStorage.getItem('user_name')}`)
+                }>
+                    <UserOutlined />&nbsp;个人中心
+                </span>
+            ),
+        },
         {
             key: '1',
             label: (
                 <span >
-                    退出登录
+                    <RightSquareOutlined />&nbsp;退出登录
                 </span>
             ),
         },

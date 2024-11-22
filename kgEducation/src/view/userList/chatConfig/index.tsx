@@ -4,20 +4,22 @@ import './index.scss'
 import { getGroupUserListApi } from '@/config/apis'
 import { Avatar } from 'antd'
 import { PlusOutlined, UserOutlined } from '@ant-design/icons';
+import { useGlobalContext } from '@/context/Global';
 
 interface ChatConfigProps {
     group_id: string
-    type:string
+    type: string
 }
 
 const ChatConfig = (props: ChatConfigProps) => {
-    const { group_id,type } = props
+    const { setRouter } = useGlobalContext()
+    const { group_id, type } = props
     const [useList, setUserList] = React.useState<any[]>([])
     const initData = async () => {
-        console.log(group_id,type);
-        const { data } = await getGroupUserListApi({ group_id,type })
+        console.log(group_id, type);
+        const { data } = await getGroupUserListApi({ group_id, type })
         console.log(data.userList);
-        
+
         setUserList(data.userList)
         // const newUserList = Array.from({ length: 10 }, () => data.userList).flat();
         // setUserList(newUserList);
@@ -30,16 +32,20 @@ const ChatConfig = (props: ChatConfigProps) => {
     return (
         <div className="chat-config-container">
             <div className="chat-config-list">
-                {useList?.map((item: any,index) => {
+                {useList?.map((item: any, index) => {
                     return (
-                        <div className="chat-list-item" key={index}>
+                        <div className="chat-list-item" key={index}
+                            onClick={() =>
+                                setRouter(`/home/personal?id=${item.id}&user_name=${item.real_name}`)
+                            }
+                        >
                             <Avatar shape="square" size="large" icon={<UserOutlined />} />
                             {item?.real_name}
                         </div>
                     )
                 })}
                 <div className="chat-list-item">
-                    <Avatar style={{ backgroundColor: '#FFFFFF',color:'#949494' }} shape="square" size="large" icon={<PlusOutlined />} />
+                    <Avatar style={{ backgroundColor: '#FFFFFF', color: '#949494' }} shape="square" size="large" icon={<PlusOutlined />} />
                     添加
                 </div>
             </div>

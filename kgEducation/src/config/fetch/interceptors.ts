@@ -1,4 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { clearStorage } from './global';
 
 
 // 请求拦截器
@@ -16,10 +17,16 @@ export const requestFail = (error: AxiosRequestConfig) => {
 
 // 接收拦截器
 export const responseSuccess = (response: AxiosResponse) => {
+    const { data } = response
+    if (data.status == 401) {
+        window.location.hash = `/login`;
+        clearStorage();
+    }
     return response;
 };
 
 export const responseFail = (error: AxiosResponse) => {
-   
+    console.log(error, 3435);
+
     return Promise.reject(error);
 };

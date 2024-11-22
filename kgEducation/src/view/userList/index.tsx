@@ -18,12 +18,16 @@ interface MessageInfo {
     dateTime?: string;
     avatar?: string;
     user1_id: number
-    user2_id: number
+    user2_id: number,
 }
 interface Message {
     messageInfo: MessageInfo,
-    userInfo?: any
+    userInfo?: {
+        avatar:any
+    }
 }
+
+
 
 // 定义表情数据数组
 const emojis = ['😀', '😎', '👍', '😄', '😍', '🤩', '😅', '🤣', '😭', '😡', '🤗', '🙄', '😴', '💤', '🍔', '🍕', '🎈', '🎉', '💐', '🌺'];
@@ -45,8 +49,6 @@ const UserList: React.FC = () => {
     const inputRef = React.useRef<HTMLTextAreaElement>(null);
     const messagesRef = React.useRef<HTMLDivElement>(null);
     const [messages, setMessages] = React.useState<Message[]>([]);
-
-
     //开启webSocket连接
     const { socket, onlineUserList } = useWebSocket(messages, setMessages)
 
@@ -83,12 +85,15 @@ const UserList: React.FC = () => {
                         user2_id: Number(user2_id),
                         dateTime: formattedDate,
                         user2_name,
-                        message: inputValue
+                        message: inputValue,
                     }
                     setLastMessageTime(new Date())
                 }
                 setMessages([...messages, {
-                    messageInfo: { ...dataQuery }
+                    messageInfo: { ...dataQuery },
+                    userInfo:{
+                        avatar:localStorage.getItem('avatar')
+                    }
                 }]);
                 if (chatType == 'private') {
                     sendMessagePrivate(inputValue, dataQuery)
@@ -141,10 +146,10 @@ const UserList: React.FC = () => {
     //局部抽屉
     const { token } = theme.useToken();
     const [openDrawer, setOpenDrawer] = React.useState(false);
-  
+
     const showDrawer = () => {
         setOpenDrawer(true);
-      };
+    };
     const onClose = () => {
         setOpenDrawer(false);
     };
@@ -167,15 +172,15 @@ const UserList: React.FC = () => {
         position: 'relative',
         border: `1px solid ${token.colorBorderSecondary}`,
         borderRadius: token.borderRadiusLG,
-      };
+    };
 
     return (
         <div className="chatting-container" style={containerStyle}>
             <div className="content-header">
                 <span>{user2_name}</span>
-                <span onClick={()=>showDrawer()}><EllipsisOutlined /></span></div>
+                <span onClick={() => showDrawer()}><EllipsisOutlined /></span></div>
             <div className="content-box" ref={messagesRef}>
-                {messages?.map((item, index) => {
+                {messages?.map((item:Message, index) => {
                     const isOwnMessage = item.messageInfo.user1_id === user1_id;
                     return (
                         <div key={index} >
@@ -186,11 +191,15 @@ const UserList: React.FC = () => {
                                 isOwnMessage ? (
                                     <div className='chat-message own-message'>
                                         <span>{item.messageInfo?.message}</span>
-                                        <img src={courseImage} alt="Avatar" className="chat-avatar" />
+                                        <img
+                                            src={item.userInfo?.avatar ? 'http://localhost:3000/uploads/' + item?.userInfo?.avatar : courseImage}
+                                            alt="Avatar" className="chat-avatar" />
                                     </div>
                                 ) : (
                                     <div className='chat-message'>
-                                        <img src={courseImage} alt="Avatar" className="chat-avatar" />
+                                        <img
+                                            src={item.userInfo?.avatar ? 'http://localhost:3000/uploads/' + item?.userInfo?.avatar : courseImage}
+                                            alt="Avatar" className="chat-avatar" />
                                         <span>{item.messageInfo.message}</span>
                                     </div>
                                 )
@@ -236,7 +245,7 @@ const UserList: React.FC = () => {
                 onClose={onClose}
                 open={openDrawer}
                 getContainer={false}
-                style={{background:'#F5F5F5'}}
+                style={{ background: '#F5F5F5' }}
             >
                 <ChatConfig type={chatType!} group_id={user2_id!}></ChatConfig>
             </Drawer>

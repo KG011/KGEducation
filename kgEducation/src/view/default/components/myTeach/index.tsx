@@ -12,7 +12,7 @@ interface MyTeachProps {
     jumpRouter: (path: string) => void
 }
 const MyTeach: React.FC<MyTeachProps> = (props) => {
-    const { setOpenModel,setRouter } = useGlobalContext()
+    const { setOpenModel } = useGlobalContext()
     const { jumpRouter } = props
     //课程数据
     const [courseList, setCourseList] = useState(new Array(20).fill({ label: '2' }))
@@ -23,15 +23,10 @@ const MyTeach: React.FC<MyTeachProps> = (props) => {
     const fetchData = useCallback(async () => {
         try {
             const response = await getTeacherCourse({ userId: Number(localStorage.getItem('id')), role: 'teacher' });
-            if (response && response.data.status === 401 && response.data.msg && response.data.msg.includes("jwt expired请重新登录")) {
-                setRouter('/login'); // 跳转到登录页
-                return
-            }
             setCourseList(response.data.courseList);
         } catch (error) {
             console.error('Error fetching menu data:', error);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // 如果 getTeacherCourse 的依赖项没有变化，可以留空数组
 
     useEffect(() => {

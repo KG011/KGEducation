@@ -32,6 +32,7 @@ const SimpleContent: React.FC = () => {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('id', res.data.userId);
       localStorage.setItem('role', res.data.role);
+      localStorage.setItem('avatar', res.data.avatar);
       localStorage.setItem('user_name', res.data.real_name);
     }
     catch (error) {
