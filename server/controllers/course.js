@@ -111,8 +111,6 @@ exports.addNewCourseApi = async (req, res) => {
                 const insertAllCourseSql = `INSERT INTO all_course (course_name, teacher_id,teacher_name) VALUES (?,?,?)`;
                 db.query(insertAllCourseSql, [courseName, teacher_id, teacher_name], (err, allCourseRes) => {
                     if (err) {
-                        console.log(1);
-
                         return res.send({ status: 500, msg: err.message });
                     }
                     const insertedId = allCourseRes.insertId;
@@ -150,9 +148,6 @@ exports.addNewCourseApi = async (req, res) => {
 //修改课程目录
 exports.editCourseMenuApi = (req, res) => {
     const data = req.body
-    console.log(data);
-    console.log(data.menu_detail);
-
     const selectCourseIdSql = "select id from all_course where course_name=?;";
     db.query(selectCourseIdSql, data.course_name, (err, CourseId) => {
         // 执行 selectSql 语句失败
@@ -401,9 +396,6 @@ exports.getBacklogExamApi = (req, res) => {
             })
             .catch(err => {
                 return res.send({ status: 500, msg: err.message });
-                console.log(req.body);
-                const exam_data = JSON.stringify(req.body.exam_data)
-                console.log(exam_data);
             });
     });
 };
@@ -579,7 +571,6 @@ exports.sumbitGradeApi = (req, res) => {
         }
     });
 }
-
 
 // 获取可视化图数据信息
 exports.getGradeListapi = (req, res) => {
@@ -760,5 +751,34 @@ exports.onInviteStuApi = (req, res) => {
             });
         });
 };
+//获取课程目录
+exports.getTreeDataApi = (req, res) => {
+    const selectSql = "select course_menu from course_menu WHERE course_id=?;";
+    db.query(selectSql, req.body.course_id, (err, results) => {
+        // 执行 selectSql 语句失败
+        if (err) {
+            return res.send({ status: 500, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            msg: "获取成功",
+            treeData: results,
+        });
+    });
+}
+//获取个人中心信息
+exports.getMenuDetailApi=(req, res)=>{
+    const sql = "SELECT menu_detail FROM course_menu WHERE course_id=?";
+    db.query(sql, req.body.course_id, (err, results) =>{
+        if (err) {
+            return res.send({ status: 500, msg: err.message });
+        }
+        res.send({
+            status: 200,
+            MenuDetail:results
+        });
+    })
+}
+
 
 

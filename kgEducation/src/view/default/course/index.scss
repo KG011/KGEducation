@@ -1,5 +1,39 @@
 .course-container {
-    display: flex;
-    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    background: #fff;
 }
 
+.course-content-container{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 20px 100px;
+    box-sizing: border-box;
+    &-course{
+        flex: 1;
+        border: 1px solid red;
+        box-sizing: border-box;
+    }
+}
+
+#root .ant-tabs-nav {
+    padding-left: 20px;
+}
+
+#root .ant-tree-treenode {
+    padding: 10px 0;
+    box-sizing: border-box;
+    font-size: 16px;
+    
+}
+#root .ant-tree-treenode-switcher-open,.ant-tree-treenode-switcher-close {
+    font-size: 16px;
+    font-weight: 600;
+    background: #F8F9FA;
+    color: #181E33;
+}
+#root  .ant-tree-treenode-selected::before {
+    background: #5b96e8;
+}

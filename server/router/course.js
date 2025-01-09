@@ -28,6 +28,8 @@ router.post("/checkIsHaveExamApi", controllers.checkIsHaveExamApi);
 router.post("/getCourseMemberApi", controllers.getCourseMemberApi);
 router.get("/getStudentListApi", controllers.getStudentListApi);
 router.post("/onInviteStuApi", controllers.onInviteStuApi);
+router.post("/getTreeDataApi", controllers.getTreeDataApi);
+router.post("/getMenuDetailApi", controllers.getMenuDetailApi);
 
 // 导出router
 module.exports = router;

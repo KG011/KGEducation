@@ -31,7 +31,6 @@ exports.getFriendList = (req, res) => {
 };
 // 获取群聊列表
 exports.getGroupListApi = (req, res) => {
-    console.log(req.body);
     const selectSql = "select * FROM grouplist WHERE user_id=?";
     db.query(selectSql, [req.body.userId], (err, results) => {
         // 执行 selectSql 语句失败
@@ -67,7 +66,6 @@ ORDER BY effectiveDateTime ASC;`;
 
         // 2. 如果有消息结果，遍历结果并根据 user2_id 从 users 表查找对应信息
         if (messageResults.length > 0) {
-            console.log(messageResults);
             const userIdsToLookup = messageResults.map(result => result.user1_id);
             const uniqueUserIds = [...new Set(userIdsToLookup)];
 

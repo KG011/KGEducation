@@ -83,7 +83,6 @@ exports.login = (req, res) => {
         const token = jwt.sign({ username: req.body.username }, secretKey, {
             expiresIn: expiresIn,
         });
-        console.log(results[0]);
         
         res.send({
             status: 200,

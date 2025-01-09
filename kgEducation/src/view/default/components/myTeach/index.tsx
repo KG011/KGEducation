@@ -27,7 +27,7 @@ const MyTeach: React.FC<MyTeachProps> = (props) => {
         } catch (error) {
             console.error('Error fetching menu data:', error);
         }
-    }, []); // 如果 getTeacherCourse 的依赖项没有变化，可以留空数组
+    }, []);
 
     useEffect(() => {
         fetchData();
@@ -37,7 +37,7 @@ const MyTeach: React.FC<MyTeachProps> = (props) => {
             <div className="education-cantainer">
                 {courseList?.map((item,index) => {
                     return (
-                        <div key={index} className="edu-item" onClick={() => jumpRouter(`/home/course?course_name=${item.course_name}&course_id=${item.course_id}`)}>
+                        <div key={index} className="edu-item" onClick={() => jumpRouter(`course?course_name=${item.course_name}&course_id=${item.course_id}&treeId=1-1`)}>
                             <div className="edu-item-img">
                                 <img src={courseImage} alt={item.course_name} />
                             </div>

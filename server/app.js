@@ -9,6 +9,7 @@ const multer = require('multer');
 const path = require('path');
 // 导入 cors 中间件，解决跨域问题
 const cors = require("cors");
+const fs = require('fs');
 // 将 cors 注册为全局中间件
 app.use(cors());
 
@@ -53,7 +54,82 @@ app.post('/upload', upload.single('avata'), (req, res) => {
       });
   });
 });
+// 目录图片上传路由
+app.post('/upload-directory-image', upload.single('directoryImage'), (req, res) => {
+  const fileName = req.body.title+'-'+req.file.filename;
+  const course_id = req.body.course_id;
+  // 查询现有的 image 字段
+  const selectImgSql = 'SELECT menu_detail FROM course_menu WHERE course_id = ?';
+  db.query(selectImgSql, [course_id], (err, results) => {
+      if (err) {
+          return res.send({ status: 500, msg: err.message });
+      }
+      let images = [];
+      if (results.length > 0 && results[0].menu_detail) {
+          images = JSON.parse(results[0].menu_detail) || [];
+      }
+      // 将新图片追加到数组中
+      images.push(fileName);
 
+      // 更新数据库中的 image 字段
+      const updateDirectoryImgSql = 'UPDATE course_menu SET menu_detail = ? WHERE course_id = ?';
+      db.query(updateDirectoryImgSql, [JSON.stringify(images), course_id], (err, results) => {
+          if (err) {
+              return res.send({ status: 500, msg: err.message });
+          }
+          res.send({
+              status: 200,
+              msg: "目录图片上传成功，已保存到数据库",
+          });
+      });
+  });
+});
+// 删除图片路由
+app.post('/delete-directory-image', (req, res) => {
+  const { fileName, title, course_id } = req.body;
+  const fullFileName = `${title}-${fileName}`;
+
+  // 查询现有的 image 字段
+  const selectImgSql = 'SELECT menu_detail FROM course_menu WHERE course_id = ?';
+  db.query(selectImgSql, [course_id], (err, results) => {
+      if (err) {
+          return res.send({ status: 500, msg: err.message });
+      }
+      let images = [];
+      if (results.length > 0 && results[0].menu_detail) {
+          images = JSON.parse(results[0].menu_detail) || [];
+      }
+
+      // 从数组中删除图片
+      images = images.filter(image => image !== fullFileName);
+
+      // 更新数据库中的 image 字段
+      const updateDirectoryImgSql = 'UPDATE course_menu SET menu_detail = ? WHERE course_id = ?';
+      db.query(updateDirectoryImgSql, [JSON.stringify(images), course_id], (err, results) => {
+          if (err) {
+              return res.send({ status: 500, msg: err.message });
+          }
+
+          // 删除文件
+          const filePath = path.join(__dirname, 'public', 'uploads', fileName);
+          fs.unlink(filePath, (err) => {
+              if (err) {
+                  return res.send({ status: 500, msg: err.message });
+              }
+              res.send({
+                  status: 200,
+                  msg: "目录图片删除成功，已从数据库和文件系统中删除",
+              });
+          });
+      });
+  });
+});
+
+
+// 导入路由模块
+const userRouter = require("./router/user");
+// 注册路由模块
+app.use("/user", userRouter);
 
 // 导入 express-jwt 并解构
 const expressJWT = require('express-jwt')
@@ -65,13 +141,6 @@ app.use(
     path: ['/login','/upload'], // 排除不需要验证 token 的路由
   })
 );
-
-
-
-// 导入路由模块
-const userRouter = require("./router/user");
-// 注册路由模块
-app.use("/user", userRouter);
 
 
 
@@ -99,7 +168,7 @@ const io = new Server(3001, {
   }
 })
 
-// socketServer(io)
+socketServer(io)
 //socket服务
 const chattingCT = require('./controllers/chatting');
 const { login } = require("./controllers/user.js");
@@ -155,7 +224,6 @@ io.on('connection', (socket) => {
   });
   // 私聊发送消息
   socket.on('send', ({ fromUsername, targetId, msg }) => {
-    console.log(21);
 
     const targetSocket = io.sockets.sockets.get(targetId)
     const toUser = userList.find(user => user.id == targetId)
@@ -191,7 +259,7 @@ app.use((err, req, res, next) => {
     return res.send({ status: 401, msg: "无效的token！" });
   // 其它错误
   res.send({
-    status: 401,
+    status: 402,
     msg: err.message,
   });
 });

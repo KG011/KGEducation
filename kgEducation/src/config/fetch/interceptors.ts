@@ -18,7 +18,7 @@ export const requestFail = (error: AxiosRequestConfig) => {
 // 接收拦截器
 export const responseSuccess = (response: AxiosResponse) => {
     const { data } = response
-    if (data.status == 401) {
+    if (data.status == 401||data.status == 402&&data.msg==='jwt expired') {
         window.location.hash = `/login`;
         clearStorage();
     }

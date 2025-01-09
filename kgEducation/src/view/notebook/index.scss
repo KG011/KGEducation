@@ -9,3 +9,55 @@
         height: 100%;
     }
 }
+.education-cantainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 270px);
+    grid-gap: 20px;
+    width: 100%;
+    height: 100%;
+
+    .edu-item {
+        min-height: 180px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        cursor: pointer;
+
+        &-img {
+            width: 100%;
+            height: 140px;
+            border-radius: 5px;
+
+            img {
+                height: 100%;
+                width: 100%;
+                border-radius: 5px;
+            }
+        }
+
+        &-label {
+            width: 100%;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            color: #131B26;
+
+            &-course {
+                font-size: 16px;
+                font-weight: bold;
+                color: #131B26;
+            }
+
+            &-teacher {
+                font-size: 13px;
+                color: #a8a8b3;
+
+            }
+        }
+    }
+
+    .edu-item:hover {
+        .edu-item-label-course{
+            color: #3A8BFF;
+        }
+    }
+}

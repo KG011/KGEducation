@@ -112,7 +112,7 @@ const UserList: React.FC = () => {
             return user.username == user2_name
         })
         //webSocket实时发送信息
-        if (isLogin != undefined) {
+        if (isLogin !== undefined) {
             socket.emit('send', {
                 fromUsername: user1_name,
                 targetId: isLogin.id,

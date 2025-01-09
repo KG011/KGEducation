@@ -102,6 +102,18 @@ export const onInviteStuApi = (data:object) => {
     return fetch.post('/course/onInviteStuApi',data)
 }
 
+//获取课程目录
+export const getTreeDataApi = (data:object) => {
+    return fetch.post('/course/getTreeDataApi',data)
+}
+
+//获取课程资料信息
+export const getMenuDetailApi = (data:object) => {
+    return fetch.post('/course/getMenuDetailApi',data)
+}
+
+
+
 
 
 
