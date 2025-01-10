@@ -16,14 +16,8 @@ const ChatConfig = (props: ChatConfigProps) => {
     const { group_id, type } = props
     const [useList, setUserList] = React.useState<any[]>([])
     const initData = async () => {
-        console.log(group_id, type);
         const { data } = await getGroupUserListApi({ group_id, type })
-        console.log(data.userList);
-
         setUserList(data.userList)
-        // const newUserList = Array.from({ length: 10 }, () => data.userList).flat();
-        // setUserList(newUserList);
-
     }
     React.useEffect(() => {
         initData()
@@ -39,7 +33,7 @@ const ChatConfig = (props: ChatConfigProps) => {
                                 setRouter(`/home/personal?id=${item.id}&user_name=${item.real_name}`)
                             }
                         >
-                            <Avatar shape="square" size="large" icon={<UserOutlined />} />
+                            <Avatar src={'http://localhost:3000/uploads/'+item.avatar} shape="square" size="large" icon={<UserOutlined />} />
                             {item?.real_name}
                         </div>
                     )

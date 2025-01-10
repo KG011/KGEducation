@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { EditOutlined, FileSearchOutlined, HomeOutlined, LineChartOutlined, ReadOutlined, SnippetsOutlined, SolutionOutlined, UserAddOutlined, UserDeleteOutlined, UserOutlined } from '@ant-design/icons';
+import { EditOutlined, FileSearchOutlined, HomeOutlined, LineChartOutlined, OpenAIOutlined, QuestionCircleOutlined, ReadOutlined, SnippetsOutlined, SolutionOutlined, UserAddOutlined, UserDeleteOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Menu } from 'antd';
+import { FloatButton, Menu } from 'antd';
 import KGHeader from '@/components/KGHeader'
 import './index.scss'
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useSearchParams } from 'react-router-dom';
 import { useGlobalContext } from '@/context/Global';
 import { getFriendListApi, getGroupListApi } from '@/config/apis';
 // import RouterWrapper from '@/router';
@@ -14,8 +14,11 @@ type MenuItem = Required<MenuProps>['items'][number];
 
 
 const Home: React.FC = () => {
-    const { setRouter } = useGlobalContext()
-
+    const { setRouter,setOpenModel } = useGlobalContext()
+    const [searchParams] = useSearchParams();
+    const user_name = searchParams.get('user_name');
+    const user_id = searchParams.get('user_id');
+    const chatType = searchParams.get('chatType');
     const items: MenuItem[] = [
         {
             key: '/home/default',
@@ -115,6 +118,8 @@ const Home: React.FC = () => {
                                 ...item,
                                 children: item.children.map((subItem: { key: string; }) => {
                                     if (subItem.key === '联系人') {
+                                        console.log(contactsData,2552);
+                                        
                                         return {
                                             ...subItem,
                                             children: contactsData
@@ -147,20 +152,18 @@ const Home: React.FC = () => {
     useEffect(() => {
         switch (location.pathname) {
             case '/home/userList':
-                break
-            case '/home/gradeDetail':
+                setDefaultSelectedKeys(`${user_name}-${user_id}-${chatType}`)
                 break
             default:
-                console.log(location.pathname);
                 setDefaultSelectedKeys(location.pathname)
                 break;
         }
-    }, [location])
+    }, [location, user_id, user_name, chatType])
     const onClick: MenuProps['onClick'] = (e) => {
         if (e.key.includes('friend')) {
             const userParm = e.key.split('-')
             setDefaultSelectedKeys(e.key)
-            setRouter(`/home/userList?user_name=${userParm[0]}&user_id=${userParm[1]}&chatType=private`)
+            setRouter(`/home/userList?user_name=${userParm[0]}&user_id=${userParm[1]}&chatType=friend`)
             return
         }
         if (e.key.includes('group')) {
@@ -184,12 +187,18 @@ const Home: React.FC = () => {
                     onClick={onClick}
                     style={{ width: 256 }}
                     selectedKeys={[defaultSelectedKeys]}
-                    // defaultOpenKeys={[defaultOpenKeys]}
+                    // openKeys={defaultOpenKeys}
                     mode="inline"
                     items={menuList}
                 />
                 <div className="kg-content">
                     <Outlet></Outlet>
+                    <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
+                    <FloatButton tooltip={<div>使用帮助</div>} icon={<QuestionCircleOutlined />} />
+                    <FloatButton tooltip={<div>便携AI</div>} icon={<OpenAIOutlined />} />
+                    {location.pathname==='/home/notebook'&&<FloatButton tooltip={<div>创建新笔记</div>} onClick={() => { setOpenModel(true) }} />}
+                    <FloatButton.BackTop visibilityHeight={0} />
+                </FloatButton.Group>
                 </div>
             </div>
         </div>

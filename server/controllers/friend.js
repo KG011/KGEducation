@@ -286,7 +286,7 @@ exports.getGroupUserListApi = (req, res) => {
                 // 提取user_id数组
                 let userIds = userIdsResults.map(result => result.user_id);
                 // 根据每个user_id去users表中查找信息
-                const selectUserInfoSql = `SELECT real_name, id FROM users WHERE id IN (?)`;
+                const selectUserInfoSql = `SELECT real_name, avatar, id FROM users WHERE id IN (?)`;
                 db.query(selectUserInfoSql, [userIds], (err, userInfoResults) => {
                     if (err) {
                         return res.send({ status: 500, msg: err.message });
@@ -308,7 +308,7 @@ exports.getGroupUserListApi = (req, res) => {
         });
     } else {
         // 根据group_id直接去users表找对应信息
-        const selectUserInfoSql = `SELECT real_name, id FROM users WHERE id =?`;
+        const selectUserInfoSql = `SELECT real_name, avatar, id FROM users WHERE id =?`;
         db.query(selectUserInfoSql, [group_id], (err, userInfoResults) => {
             if (err) {
                 return res.send({ status: 500, msg: err.message });

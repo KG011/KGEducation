@@ -11,10 +11,17 @@
     height: 100%;
     padding: 20px 100px;
     box-sizing: border-box;
+    overflow-y: auto;
     &-course{
         flex: 1;
-        border: 1px solid red;
         box-sizing: border-box;
+        padding-bottom: 50px;
+        &-item-images{
+            width: 100%;
+            img{
+                width: 100%;
+            }
+        }
     }
 }
 

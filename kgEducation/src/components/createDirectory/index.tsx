@@ -98,7 +98,7 @@ const CreateDirectory: React.FC<CreateDirectoryProps> = ({onDataChange}) => {
             const parentNode = newData.find(node => node.key === selectedNodeKey);
             if (parentNode) {
                 const newChildKey = `${selectedNodeKey}-newChild_${Date.now()}`;
-                const newChildNode = { title: '新目录详细', key: newChildKey, children: [],isLeaf:true };
+                const newChildNode = { title: '新目录详细', key: newChildKey, children: [],isLeaf:true,itemDone:false };
                 parentNode.children = parentNode.children || [];
                 parentNode.children.push(newChildNode);
                 setGData(newData);

@@ -27,7 +27,7 @@ const MyStudy: React.FC<MyStudyProps> = (props) => {
         <div className="education-cantainer">
             {courseList.map((item, index) => {
                 return (
-                    <div key={index} className="edu-item" onClick={() => jumpRouter(`/home/course/${item.course_name}`)}>
+                    <div key={index} className="edu-item" onClick={() => jumpRouter(`course?course_name=${item.course_name}&course_id=${item.course_id}&treeId=1-1`)}>
                         <div className="edu-item-img">
                             <img src={courseImage} alt={item.course_name} />
                         </div>

@@ -3,6 +3,7 @@ import React from 'react';
 import { Tree } from 'antd';
 import type { GetProps, TreeDataNode } from 'antd';
 import { useGlobalContext } from '@/context/Global';
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'react-router-dom';
 import { getTreeDataApi } from '@/config/apis/modules/course';
 
@@ -36,23 +37,52 @@ const MenuList: React.FC = () => {
     const [searchParams] = useSearchParams();
     const course_name = searchParams.get('course_name');
     const course_id = searchParams.get('course_id');
-    const [menuData,setMenuData]=React.useState(treeData)
+    const [menuData, setMenuData] = React.useState(treeData)
     // const treeId = searchParams.get('treeId');
 
-    const onSelect: DirectoryTreeProps['onSelect'] = (keys, info:any) => {
+    const onSelect: DirectoryTreeProps['onSelect'] = (keys, info: any) => {
         if (!info.node.isLeaf) return
-        setRouter(`course?course_name=${course_name}&course_id=${course_id}&treeId=${keys}&treeLabel=${info.node.title}`)
+        setRouter(`course?course_name=${course_name}&course_id=${course_id}&treeId=${keys}&treeLabel=${info.node.exactTitle}`)
     };
-    const initData=async()=>{
-        const{data}= await getTreeDataApi({course_id})
-        if(data.treeData.length>0){
+    const initData = async () => {
+        const { data } = await getTreeDataApi({ course_id })
+        if (data.treeData.length > 0) {
             setMenuData(JSON.parse(data.treeData[0].course_menu));
         }
-      }
-      React.useEffect(()=>{
+    }
+    React.useEffect(() => {
         initData()
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      },[])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    /**
+     * 二次处理树数据，添加阅读状态
+     * @param data 
+     * @returns 
+     */
+    const renderTitle = (node: any) => {
+        return (
+            <span>
+                {node.title}
+                {node.isLeaf &&
+                    node.itemDone ? <span style={{ float:'right',marginRight:'10px',color: '#31DDB3' }}><CheckOutlined /></span>
+                    : <span><CloseOutlined style={{ float:'right',marginRight:'10px',color: 'red' }} /></span>
+                }
+            </span>
+        );
+    };
+    /**
+     * 二次处理树数据，添加阅读状态
+     * @param data 
+     * @returns 
+     */
+    const processTreeData = (data: TreeDataNode[]): TreeDataNode[] => {
+        return data.map(node => ({
+            ...node,
+            title: renderTitle(node),
+            exactTitle: node.title,
+            children: node.children ? processTreeData(node.children) : undefined,
+        }));
+    };
 
     return (
         <DirectoryTree
@@ -60,7 +90,7 @@ const MenuList: React.FC = () => {
             defaultExpandedKeys={['0-0']}
             defaultSelectedKeys={['0-0-0']}
             onSelect={onSelect}
-            treeData={menuData}
+            treeData={processTreeData(menuData)}
         />
     );
 };

@@ -50,7 +50,7 @@ const KGHeader: React.FC<KGHeader> = (props) => {
                 <Dropdown menu={{ items }}>
                     <span onClick={(e) => e.preventDefault()}>
                         <Space>
-                            <img src={PersonalImg}></img>{localStorage.getItem('user_name')}
+                            <img src={localStorage.getItem('avatar')?'http://localhost:3000/uploads/'+localStorage.getItem('avatar'): PersonalImg}></img>{localStorage.getItem('user_name')}
                             <DownOutlined />
                         </Space>
                     </span>

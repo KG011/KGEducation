@@ -6,8 +6,7 @@ import { useGlobalContext } from '@/context/Global';
 // import courseImg from '@/assets/course1.png'
 // import PhotoShow from '@/components/photoShow';
 import { getUserIDFromLocalStorage } from '@/utils/storage'
-import { Button, FloatButton, Image } from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Image } from 'antd';
 import ModalComponent from '@/components/Modal';
 import NewNotebook from '@/components/newNotebook';
 
@@ -20,7 +19,7 @@ interface NotebookData {
     notebookList: Array<{ [name: string]: string }>
 }
 const MyNotebook: React.FC<MyNotebookProps> = () => {
-    const { userInfo, setIsPhotoShow, setRouter, setOpenModel } = useGlobalContext()
+    const { userInfo, setIsPhotoShow, setRouter,  } = useGlobalContext()
     const [notebookData, setNotebookData] = React.useState<NotebookData>()
     React.useEffect(() => {
         const myNotebookData = async () => {
@@ -61,11 +60,7 @@ const MyNotebook: React.FC<MyNotebookProps> = () => {
                         </div>
                     )
                 })}
-                <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
-                    <FloatButton icon={<QuestionCircleOutlined />} />
-                    <FloatButton tooltip={<div>创建新笔记</div>} onClick={() => { setOpenModel(true) }} />
-                    <FloatButton.BackTop visibilityHeight={0} />
-                </FloatButton.Group>
+                
             </div>
 
             <ModalComponent title='创建新笔记' notFooter={true}>

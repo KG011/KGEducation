@@ -18,10 +18,15 @@ exports.getMyCourse = (req, res) => {
             if (err) {
                 return res.send({ status: 500, msg: err.message });
             }
+            // 将课程 ID 和课程信息一起返回
+            const courseList = allCourseResults.map((course, index) => ({
+                course_id: courseIdArray[index],
+                ...course
+            }));
             res.send({
                 status: 200,
                 msg: "获取成功",
-                courseList: allCourseResults,
+                courseList: courseList,
             });
         });
     });
@@ -204,7 +209,7 @@ exports.addNotebookApi = (req, res) => {
         if (checkResults.length === 0) {
             //插入到我的笔记
             const insertMyNotebookSql = `INSERT INTO my_notebook (user_id, notebook_data,imgUrl,notebook_type) VALUES (?,?,?,?)`;
-            db.query(insertMyNotebookSql, [data.userId, JsonData, imgUrl,data.notebook_type], (err, results) => {
+            db.query(insertMyNotebookSql, [data.userId, JsonData, imgUrl, data.notebook_type], (err, results) => {
                 if (err) {
                     return res.send({ status: 502, msg: err.message });
                 }
@@ -301,7 +306,7 @@ exports.addExamApi = (req, res) => {
             const course_id = results[0].id;
             // 插入到我的exam
             const insertExamSql = `INSERT INTO exam (course_id, course_name,teacher_name,exam_data,Date,title) VALUES (?,?,?,?,?,?)`;
-            db.query(insertExamSql, [course_id, data.course_name, data.teacher_name, exam_data, data.Date,data.title], (err, Examresults) => {
+            db.query(insertExamSql, [course_id, data.course_name, data.teacher_name, exam_data, data.Date, data.title], (err, Examresults) => {
                 if (err) {
                     reject({ status: 500, msg: err.message });
                     return;
@@ -325,7 +330,7 @@ exports.addExamApi = (req, res) => {
                                 }
                                 const student_name = stu[0].real_name;
                                 const insertExamTableSql = `INSERT INTO exam_table (course_id, course_name,student_name,grade,tags,Date,exam_id,totalGrade) VALUES (?,?,?,?,?,?,?,?)`;
-                                db.query(insertExamTableSql, [course_id, data.course_name, student_name, data.grade, tags, data.Date, exam_id,data.totalGrade], (err, results) => {
+                                db.query(insertExamTableSql, [course_id, data.course_name, student_name, data.grade, tags, data.Date, exam_id, data.totalGrade], (err, results) => {
                                     if (err) {
                                         innerReject({ status: 500, msg: err.message });
                                         return;
@@ -337,23 +342,23 @@ exports.addExamApi = (req, res) => {
                     });
 
                     Promise.all(promises)
-                      .then(() => {
+                        .then(() => {
                             resolve({
                                 status: 200,
                                 msg: "添加考试到Exam表成功"
                             });
                         })
-                      .catch(err => {
+                        .catch(err => {
                             reject(err);
                         });
                 });
             });
         });
     })
-      .then(result => {
+        .then(result => {
             res.send(result);
         })
-      .catch(err => {
+        .catch(err => {
             res.send(err);
         });
 };
@@ -700,7 +705,7 @@ exports.onInviteStuApi = (req, res) => {
         return new Promise((resolve, reject) => {
             const { course_id, student_id } = item;
             // 检查每个元素中的必要数据是否存在，如果不存在则直接标记为插入失败
-            if (!course_id ||!student_id) {
+            if (!course_id || !student_id) {
                 failCount++;
                 resolve(); // 虽然插入失败，但依然需要resolve，继续处理下一个元素
                 return;
@@ -724,7 +729,7 @@ exports.onInviteStuApi = (req, res) => {
 
     // 使用Promise.all来并发处理所有的插入操作，等待所有操作完成
     Promise.all(promises)
-      .then(() => {
+        .then(() => {
             // 根据成功和失败的数量来返回相应的提示信息给客户端
             if (successCount > 0 && failCount === 0) {
                 res.send({
@@ -743,7 +748,7 @@ exports.onInviteStuApi = (req, res) => {
                 });
             }
         })
-      .catch((err) => {
+        .catch((err) => {
             // 如果在并发处理过程中出现任何一个错误，直接返回错误信息给客户端
             res.send({
                 status: 500,
@@ -753,7 +758,7 @@ exports.onInviteStuApi = (req, res) => {
 };
 //获取课程目录
 exports.getTreeDataApi = (req, res) => {
-    const selectSql = "select course_menu from course_menu WHERE course_id=?;";
+    const selectSql = "select course_menu,done from course_menu WHERE course_id=?;";
     db.query(selectSql, req.body.course_id, (err, results) => {
         // 执行 selectSql 语句失败
         if (err) {
@@ -767,15 +772,15 @@ exports.getTreeDataApi = (req, res) => {
     });
 }
 //获取个人中心信息
-exports.getMenuDetailApi=(req, res)=>{
-    const sql = "SELECT menu_detail FROM course_menu WHERE course_id=?";
-    db.query(sql, req.body.course_id, (err, results) =>{
+exports.getMenuDetailApi = (req, res) => {
+    const sql = "SELECT menu_detail,done FROM course_menu WHERE course_id=?";
+    db.query(sql, req.body.course_id, (err, results) => {
         if (err) {
             return res.send({ status: 500, msg: err.message });
         }
         res.send({
             status: 200,
-            MenuDetail:results
+            MenuDetail: results
         });
     })
 }

@@ -23,7 +23,7 @@ interface MessageInfo {
 interface Message {
     messageInfo: MessageInfo,
     userInfo?: {
-        avatar:any
+        avatar: any
     }
 }
 
@@ -45,13 +45,14 @@ const UserList: React.FC = () => {
     const user2_id = searchParams.get('user_id');
     //聊天类型 私人1对1 聊天室
     const chatType = searchParams.get('chatType');
+    //表情包开关
     const [open, setOpen] = React.useState(false);
-    const inputRef = React.useRef<HTMLTextAreaElement>(null);
+    const inputRef = React.useRef<HTMLDivElement>(null);
     const messagesRef = React.useRef<HTMLDivElement>(null);
+    //消息列表
     const [messages, setMessages] = React.useState<Message[]>([]);
     //开启webSocket连接
     const { socket, onlineUserList } = useWebSocket(messages, setMessages)
-
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen);
     };
@@ -59,15 +60,17 @@ const UserList: React.FC = () => {
     // 处理表情包点击事件，将点击的表情添加到输入框内容中
     const handleEmojiClick = (emoji: string) => {
         if (inputRef.current) {
-            const currentValue = inputRef.current.value;
-            inputRef.current.value = currentValue + emoji;
+            inputRef.current.innerHTML += emoji;
         }
     };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    /**
+     * 回车发送消息
+     * @param e 
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.keyCode === 13) {
             e.preventDefault();
-            const inputValue = inputRef.current?.value;
+            const inputValue = inputRef.current?.innerHTML;
             if (inputValue && inputValue.trim() !== "") {
                 const now = new Date();
                 let dataQuery
@@ -91,8 +94,8 @@ const UserList: React.FC = () => {
                 }
                 setMessages([...messages, {
                     messageInfo: { ...dataQuery },
-                    userInfo:{
-                        avatar:localStorage.getItem('avatar')
+                    userInfo: {
+                        avatar: localStorage.getItem('avatar')
                     }
                 }]);
                 if (chatType == 'private') {
@@ -101,7 +104,7 @@ const UserList: React.FC = () => {
                     sendMessageGroup(inputValue, dataQuery)
                 }
                 if (inputRef.current) {
-                    inputRef.current.value = "";
+                    inputRef.current.innerHTML = "";
                 }
             }
         }
@@ -126,7 +129,9 @@ const UserList: React.FC = () => {
         console.log(inputValue);
         appendGroupMessageApi(dataQuery)
     }
-
+    /**
+     * 初始化数据
+     */
     const initData = async () => {
         if (chatType == 'private') {
             const dataQuery = {
@@ -152,6 +157,58 @@ const UserList: React.FC = () => {
     };
     const onClose = () => {
         setOpenDrawer(false);
+    };
+
+    /**
+     * 处理点击图片上传入口的函数，触发文件选择框
+     */
+    const handleImageUploadClick = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    if (reader.result) {
+                        const base64Image = reader.result as string;
+                        const imgTag = `<img src="${base64Image}" style="max-width: 100%; max-height: 100px; display: block; margin-bottom: 5px;" />`;
+                        if (inputRef.current) {
+                            inputRef.current.innerHTML += imgTag;
+                            inputRef.current.focus();
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    };
+    /**
+     * 渲染消息中的图片
+     * @param messageText 
+     * @returns 
+     */
+    const renderImages = (messageText: string) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(messageText, 'text/html');
+        const imgTags = doc.querySelectorAll('img');
+        imgTags.forEach((imgTag) => {
+            const base64Data = imgTag.getAttribute('src');
+            const img = new Image();
+            if (base64Data) {
+                img.src = base64Data;
+            }
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '100px';
+            img.style.display = 'block';
+            img.style.marginBottom = '5px';
+            if (imgTag.parentNode) {
+                imgTag.parentNode.replaceChild(img, imgTag);
+            }
+        });
+        return doc.body.innerHTML;
     };
 
     React.useEffect(() => {
@@ -180,7 +237,7 @@ const UserList: React.FC = () => {
                 <span>{user2_name}</span>
                 <span onClick={() => showDrawer()}><EllipsisOutlined /></span></div>
             <div className="content-box" ref={messagesRef}>
-                {messages?.map((item:Message, index) => {
+                {messages?.map((item: Message, index) => {
                     const isOwnMessage = item.messageInfo.user1_id === user1_id;
                     return (
                         <div key={index} >
@@ -190,7 +247,9 @@ const UserList: React.FC = () => {
                             {
                                 isOwnMessage ? (
                                     <div className='chat-message own-message'>
-                                        <span>{item.messageInfo?.message}</span>
+                                        <span
+                                            dangerouslySetInnerHTML={{ __html: renderImages(item.messageInfo?.message) }}
+                                        />
                                         <img
                                             src={item.userInfo?.avatar ? 'http://localhost:3000/uploads/' + item?.userInfo?.avatar : courseImage}
                                             alt="Avatar" className="chat-avatar" />
@@ -200,7 +259,9 @@ const UserList: React.FC = () => {
                                         <img
                                             src={item.userInfo?.avatar ? 'http://localhost:3000/uploads/' + item?.userInfo?.avatar : courseImage}
                                             alt="Avatar" className="chat-avatar" />
-                                        <span>{item.messageInfo.message}</span>
+                                        <span
+                                            dangerouslySetInnerHTML={{ __html: renderImages(item.messageInfo?.message) }}
+                                        />
                                     </div>
                                 )
                             }
@@ -228,13 +289,20 @@ const UserList: React.FC = () => {
                     >
                         <span><img src={smileImage} alt="" /></span>
                     </Popover>
-                    <span><img src={pictureImage} alt="" /></span>
+                    <span onClick={handleImageUploadClick}>
+                        <img src={pictureImage} alt="" />
+                    </span>
                 </div>
                 <div className="inputArea-box-middle">
-                    <textarea
+                    <div
                         ref={inputRef}
+                        contentEditable
                         onKeyDown={handleKeyDown}
+                        className="text-input"
                     />
+                    {/* <div className="selected-image-preview">
+                        {selectedImage && <img src={URL.createObjectURL(selectedImage)} alt="Selected" />}
+                    </div> */}
                 </div>
                 <div className="inputArea-box-footer">按 Enter 发送消息</div>
             </div>

@@ -18,7 +18,11 @@ const CourseMember: React.FC = () => {
     const course_id = searchParams.get('course_id');
     const [treeData, setTreeData] = useState<TreeDataNode[]>([]);
     const [fileList, setFileList] = useState<{ [key: string]: UploadFile[] }>({});
-
+    /**
+     * 上传图片前的校验
+     * @param file 
+     * @returns 
+     */
     const beforeUpload = (file: UploadFile) => {
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
         if (!isJpgOrPng) {
@@ -34,6 +38,11 @@ const CourseMember: React.FC = () => {
     const handleChange = (nodeKey: string, info: { fileList: UploadFile[] }) => {
         setFileList({ ...fileList, [nodeKey]: info.fileList });
     };
+    /**
+     * 删除图片
+     * @param file 
+     * @param nodeTitle 
+     */
     const handleRemove = async (file: UploadFile, nodeTitle: string) => {
         try {
             await axios.post('http://localhost:3000/delete-directory-image', {
